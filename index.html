@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <link href='https://raw.githack.com/nandateknik/blogger/main/manifest.json' rel='manifest'/>
     <style>
         body { font-family: 'Inter', sans-serif; background: #f8fafc; }
         #map { height: 100%; width: 100%; }
@@ -38,7 +39,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         // --- KONFIGURASI API ---
-        const API_URL = "https://script.google.com/macros/s/AKfycbxsUlxkWa9HEh6dOGkCuOKaklf6UwCQJcv1P126Mov1Z3YAld4ratBhmUHidoXpqJ6Q8g/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbyTuEBsn3-USH7_onl_P-RVlTCXXSzG1abcMafwnbAbv6OCH1fnDcpEy9T32FoGLMzIEQ/exec";
 
         let map, marker, selectedPos, customerData;
         let currentPage = 1, itemsPerPage = 5, filteredData = [];
@@ -423,5 +424,46 @@
             });
         }
     </script>
+    <script>
+                        // Register Service Worker
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('PWA Ready!'))
+            .catch(err => console.log('PWA Failed', err));
+    });
+}
+
+// Fitur "Add to Home Screen" Otomatis
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    // Tampilkan tombol instal jika diinginkan
+    showInstallBanner();
+});
+
+function showInstallBanner() {
+    Swal.fire({
+        title: 'Instal Aplikasi?',
+        text: 'Instal Nanda Teknik di layar utama untuk akses lebih cepat!',
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'Instal Sekarang',
+        cancelButtonText: 'Nanti'
+    }).then((result) => {
+        if (result.isConfirmed && deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choice) => {
+                if (choice.outcome === 'accepted') {
+                    console.log('User menginstal PWA');
+                }
+                deferredPrompt = null;
+            });
+        }
+    });
+}                                                    
+    </script>
+    
 </body>
 </html>
