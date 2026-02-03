@@ -35,127 +35,141 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbwD_TDXWHPfLGNxS5RPrmHm9S3tYp8Jd4QNFDl9H6uBDvwcT2pSq5LNYLuA-XCEhvAQzg/execA"; // GANTI INI
-        let map, marker, selectedPos, customerData;
+  let map, marker, selectedPos, customerData;
 
-        async function callAPI(action, data = {}) {
-            const params = new URLSearchParams({ action, ...data });
-            const response = await fetch(`${API_URL}?${params.toString()}`);
-            return await response.json();
+  // --- API FIX ---
+  async function callAPI(action, data = {}) {
+    const params = new URLSearchParams({ action, ...data });
+    try {
+      const response = await fetch(`${API_URL}?${params.toString()}`);
+      const result = await response.json();
+      return result;
+    } catch (err) {
+      console.error(err);
+      return { status: "error", message: "Gagal terhubung ke server." };
+    }
+  }
+
+  function initMap() {
+    if (!map) {
+      map = L.map('map', { zoomControl: false }).setView([-8.1925, 114.3820], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    }
+  }
+
+  function checkAutoLogin() {
+    const saved = localStorage.getItem('nanda_teknik_user');
+    if (saved && saved !== "undefined") {
+      customerData = JSON.parse(saved);
+      showBookingForm();
+    } else {
+      showLandingPage();
+    }
+  }
+
+  // --- FIX APPENDCHILD & MAP ---
+  function showLandingPage() {
+    const dynamicArea = document.getElementById('dynamic-area');
+    dynamicArea.innerHTML = `
+      <h3 class="font-bold text-slate-700 mb-2 italic uppercase text-xs">📍 Tentukan Lokasi Anda</h3>
+      <div id="map-container" class="rounded-3xl overflow-hidden bg-slate-100 h-[250px] border relative">
+        <div id="map-placeholder" class="absolute inset-0 flex items-center justify-center text-slate-400 text-xs font-bold">Memuat Peta...</div>
+      </div>
+      <button onclick="getLocation()" class="w-full mt-4 bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition">CARI LOKASI SAYA</button>
+      <div id="action-buttons" class="hidden mt-6 grid grid-cols-2 gap-4">
+         <button onclick="formLogin()" class="bg-blue-600 text-white py-4 rounded-3xl font-bold shadow-md">LOGIN</button>
+         <button onclick="formDaftar()" class="bg-slate-800 text-white py-4 rounded-3xl font-bold shadow-md">DAFTAR</button>
+      </div>`;
+
+    // Pastikan elemen #map dipindahkan setelah innerHTML selesai di-render
+    setTimeout(() => {
+      const mapEl = document.getElementById('map');
+      const container = document.getElementById('map-container');
+      if (mapEl && container) {
+        container.appendChild(mapEl);
+        initMap();
+        map.invalidateSize();
+      }
+    }, 100);
+  }
+
+  function formDaftar() {
+    document.getElementById('dynamic-area').innerHTML = `
+      <div class="space-y-4">
+        <h3 class="font-black text-blue-600 uppercase italic">Pendaftaran</h3>
+        <input id="reg_nama" type="text" placeholder="Nama Lengkap" class="w-full p-4 border rounded-2xl text-sm bg-slate-50">
+        <input id="reg_email" type="email" placeholder="Email Aktif" class="w-full p-4 border rounded-2xl text-sm bg-slate-50">
+        <input id="reg_wa" type="number" placeholder="WhatsApp" class="w-full p-4 border rounded-2xl text-sm bg-slate-50">
+        <input id="reg_tgl" type="date" class="w-full p-4 border rounded-2xl text-sm bg-slate-50">
+        <button onclick="handleRegister()" class="w-full bg-blue-600 text-white py-5 rounded-3xl font-bold shadow-xl">DAFTAR SEKARANG</button>
+        <button onclick="showLandingPage()" class="w-full text-slate-400 py-2 text-[10px] font-black uppercase">Kembali</button>
+      </div>`;
+  }
+
+  // --- FIX SWEETALERT OBJECT TYPE ---
+  async function handleRegister() {
+    const d = {
+      nama: document.getElementById('reg_nama').value,
+      email: document.getElementById('reg_email').value,
+      whatsapp: document.getElementById('reg_wa').value,
+      tgl_lahir: document.getElementById('reg_tgl').value,
+      lat: selectedPos?.lat,
+      lng: selectedPos?.lng
+    };
+    
+    if (!d.nama || !d.email || !d.lat) {
+      return Swal.fire("Data Tidak Lengkap", "Tentukan lokasi di peta dan isi semua formulir.", "warning");
+    }
+    
+    Swal.fire({ title: 'Mendaftarkan...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    
+    const res = await callAPI('registerCustomer', d);
+    
+    // Cek apakah response string atau object, lalu tampilkan teksnya
+    const message = (typeof res === 'object') ? (res.message || "Proses Selesai") : res;
+    
+    Swal.fire({
+      title: 'Pendaftaran Selesai',
+      text: message,
+      icon: 'success'
+    }).then(() => location.reload());
+  }
+
+  async function formLogin() {
+    const { value: email } = await Swal.fire({ title: 'Login', input: 'email', inputPlaceholder: 'Email Terdaftar' });
+    if (email) {
+      Swal.fire({ title: 'Mengecek...', didOpen: () => Swal.showLoading() });
+      const res = await callAPI('checkCustomer', { email });
+      
+      if (res && res.exists) {
+        if (!res.active) {
+          Swal.fire('Belum Aktif', 'Cek email Anda atau hubungi admin.', 'warning');
+        } else {
+          customerData = res.data;
+          localStorage.setItem('nanda_teknik_user', JSON.stringify(res.data));
+          Swal.fire('Berhasil', 'Selamat Datang Kembali!', 'success').then(() => location.reload());
         }
+      } else {
+        Swal.fire('Gagal', 'Email tidak ditemukan.', 'error');
+      }
+    }
+  }
 
-        function checkAutoLogin() {
-            const saved = localStorage.getItem('nanda_teknik_user');
-            if (saved) {
-                customerData = JSON.parse(saved);
-                showBookingForm();
-            } else {
-                showLandingPage();
-            }
-        }
-
-        function showLandingPage() {
-            document.getElementById('dynamic-area').innerHTML = `
-                <div id="map-container"></div>
-                <button onclick="getLocation()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mb-4">📍 Tentukan Lokasi Saya</button>
-                <div id="action-buttons" class="hidden grid grid-cols-2 gap-4">
-                    <button onclick="formLogin()" class="bg-blue-600 text-white py-4 rounded-xl font-bold">LOGIN</button>
-                    <button onclick="formDaftar()" class="bg-slate-800 text-white py-4 rounded-xl font-bold">DAFTAR</button>
-                </div>`;
-            initMap('map-container');
-        }
-
-        function formDaftar() {
-            document.getElementById('dynamic-area').innerHTML = `
-                <div class="space-y-3">
-                    <input id="reg_nama" type="text" placeholder="Nama Lengkap" class="w-full p-4 border rounded-xl">
-                    <input id="reg_email" type="email" placeholder="Email Aktif" class="w-full p-4 border rounded-xl">
-                    <input id="reg_wa" type="number" placeholder="WhatsApp" class="w-full p-4 border rounded-xl">
-                    <input id="reg_tgl" type="date" class="w-full p-4 border rounded-xl">
-                    <button onclick="handleRegister()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold">DAFTAR SEKARANG</button>
-                </div>`;
-        }
-
-        async function handleRegister() {
-            const d = {
-                nama: document.getElementById('reg_nama').value,
-                email: document.getElementById('reg_email').value,
-                whatsapp: document.getElementById('reg_wa').value,
-                tgl_lahir: document.getElementById('reg_tgl').value,
-                lat: selectedPos.lat, lng: selectedPos.lng
-            };
-            Swal.fire({title:'Proses...', didOpen:()=>Swal.showLoading()});
-            const res = await callAPI('registerCustomer', d);
-            Swal.fire('Berhasil', res, 'success').then(()=>location.reload());
-        }
-
-        async function formLogin() {
-            const { value: email } = await Swal.fire({ title: 'Login', input: 'email' });
-            if (email) {
-                const res = await callAPI('checkCustomer', { email });
-                if (res.exists) {
-                    if (!res.active) return Swal.fire('Belum Aktif', 'Cek email Anda atau tunggu aktivasi admin.', 'warning');
-                    customerData = res.data;
-                    localStorage.setItem('nanda_teknik_user', JSON.stringify(res.data));
-                    location.reload();
-                } else {
-                    Swal.fire('Error', 'Email tidak terdaftar.', 'error');
-                }
-            }
-        }
-
-        function showBookingForm() {
-            document.getElementById('user-badge').innerText = `Halo, ${customerData.nama}`;
-            document.getElementById('user-badge').classList.remove('hidden');
-            document.getElementById('btn-logout').classList.remove('hidden');
-            document.getElementById('dynamic-area').innerHTML = `
-                <div class="space-y-4">
-                    <input id="bk_tgl" type="date" class="w-full p-4 border rounded-xl">
-                    <input id="bk_job" type="text" placeholder="Contoh: Cuci AC" class="w-full p-4 border rounded-xl">
-                    <div class="p-4 bg-orange-50 rounded-xl flex justify-between font-bold">
-                        <span class="text-orange-600">Ongkos Transport</span>
-                        <span id="txt-ongkos">Rp0</span>
-                    </div>
-                    <button onclick="handleBooking()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold">ORDER SEKARANG</button>
-                </div>`;
-            updateOngkos();
-        }
-
-        async function updateOngkos() {
-            const ongkos = await callAPI('hitungTransport', { lat: customerData.lat, lng: customerData.lng });
-            document.getElementById('txt-ongkos').innerText = ongkos === 0 ? "GRATIS" : `Rp${ongkos.toLocaleString()}`;
-        }
-
-        async function handleBooking() {
-            const data = { 
-                tanggal: document.getElementById('bk_tgl').value, 
-                pekerjaan: document.getElementById('bk_job').value, 
-                email: customerData.email, lat: customerData.lat, lng: customerData.lng 
-            };
-            await callAPI('saveBooking', data);
-            Swal.fire('Berhasil', 'Pesanan dikirim.', 'success').then(()=>location.reload());
-        }
-
-        function initMap(cid) {
-            const m = document.getElementById('map');
-            document.getElementById(cid).appendChild(m);
-            if (!map) {
-                map = L.map('map', {zoomControl:false}).setView([-8.1925, 114.3820], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-            }
-            setTimeout(()=>map.invalidateSize(), 200);
-        }
-
-        function getLocation() {
-            navigator.geolocation.getCurrentPosition(p => {
-                selectedPos = { lat: p.coords.latitude, lng: p.coords.longitude };
-                map.setView([selectedPos.lat, selectedPos.lng], 16);
-                if (marker) map.removeLayer(marker);
-                marker = L.marker([selectedPos.lat, selectedPos.lng], {draggable:true}).addTo(map);
-                document.getElementById('action-buttons').classList.remove('hidden');
-            });
-        }
-
-        function handleLogout() { localStorage.removeItem('nanda_teknik_user'); location.reload(); }
+  function getLocation() {
+    if (!navigator.geolocation) return Swal.fire("Error", "GPS tidak didukung browser Anda.", "error");
+    
+    navigator.geolocation.getCurrentPosition((pos) => {
+      selectedPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      initMap();
+      map.setView([selectedPos.lat, selectedPos.lng], 17);
+      if (marker) map.removeLayer(marker);
+      marker = L.marker([selectedPos.lat, selectedPos.lng], {draggable: true}).addTo(map);
+      document.getElementById('action-buttons').classList.remove('hidden');
+    }, () => {
+      Swal.fire("GPS Gagal", "Pindahkan pin secara manual.", "warning");
+      document.getElementById('action-buttons').classList.remove('hidden');
+    });
+  }
     </script>
 </body>
 </html>
