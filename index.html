@@ -38,7 +38,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         // --- KONFIGURASI API ---
-        const API_URL = "https://script.google.com/macros/s/AKfycbxPntf6QsSUn-e50WQjAaUX_t0CfvUlEivQBzvwi3olBkx2du0ec9zjFgcSGqQKQkqCaA/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbzLTQiGtzh0__LqNadKo8uSAJ7KicSAoXAlXaoMvZ3djm_VPLZJ2d4qLaPh5J4-z2OlSQ/exec";
 
         let map, marker, selectedPos, customerData;
         let currentPage = 1, itemsPerPage = 5, filteredData = [];
@@ -314,15 +314,38 @@
             Swal.fire("Selesai", typeof res === 'object' ? res.message : res, "success").then(() => location.reload());
         }
 
-        async function formLogin() {
-            const { value: email } = await Swal.fire({ title: 'Login', input: 'email', inputPlaceholder: 'Email Terdaftar' });
+       async function formLogin() {
+            const { value: email } = await Swal.fire({ 
+                title: 'LOGIN', 
+                input: 'email', 
+                inputPlaceholder: 'Email Terdaftar',
+                confirmButtonText: 'CEK AKUN',
+                confirmButtonColor: '#2563eb'
+            });
+
             if (email) {
                 Swal.fire({ title: 'Mengecek...', didOpen: () => Swal.showLoading() });
                 const res = await callAPI('checkCustomer', { email });
+                
                 if (res && res.exists) {
                     if (!res.active) {
-                        Swal.fire('Belum Aktif', 'Cek email aktivasi Anda.', 'warning');
+                        // JIKA BELUM AKTIF, TAWARKAN REAKTIVASI
+                        Swal.fire({
+                            title: 'Akun Belum Aktif',
+                            text: 'Email aktivasi sudah dikirim saat pendaftaran. Belum menerima atau link kadaluwarsa?',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#2563eb',
+                            cancelButtonColor: '#64748b',
+                            confirmButtonText: 'Kirim Ulang Email',
+                            cancelButtonText: 'Nanti Saja'
+                        }).then(async (result) => {
+                            if (result.isConfirmed) {
+                                handleReactivation(email);
+                            }
+                        });
                     } else {
+                        // LOGIN SUKSES
                         customerData = res.data;
                         localStorage.setItem('nanda_teknik_user', JSON.stringify(res.data));
                         location.reload();
@@ -333,9 +356,65 @@
             }
         }
 
+        // FUNGSI BARU UNTUK MENGHUBUNGKAN KE API REAKTIVASI
+        async function handleReactivation(email) {
+            Swal.fire({ title: 'Mengirim...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            const res = await callAPI('requestReactivation', { email });
+            Swal.fire({
+                title: 'Selesai',
+                text: typeof res === 'object' ? res.message : res,
+                icon: 'info',
+                confirmButtonColor: '#2563eb'
+            });
+        }
+
         function handleLogout() {
-            localStorage.removeItem('nanda_teknik_user');
-            location.reload();
+            Swal.fire({
+                title: 'Logout?',
+                text: "Anda akan keluar dari sesi layanan Nanda Teknik.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444', // Red-500
+                cancelButtonColor: '#64748b',  // Slate-500
+                confirmButtonText: 'YA, KELUAR',
+                cancelButtonText: 'BATAL',
+                reverseButtons: true,
+                background: '#ffffff',
+                borderRadius: '2rem',
+                customClass: {
+                    title: 'font-black uppercase italic tracking-tighter',
+                    popup: 'glass'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Efek visual sebelum reload
+                    const mainCard = document.getElementById('main-card');
+                    mainCard.style.transition = 'all 0.5s ease';
+                    mainCard.style.opacity = '0';
+                    mainCard.style.transform = 'scale(0.9) translateY(20px)';
+                    mainCard.style.filter = 'blur(10px)';
+
+                    setTimeout(() => {
+                        localStorage.removeItem('nanda_teknik_user');
+                        
+                        // Beri notifikasi singkat (Toast) sebelum benar-benar reload
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 1500,
+                            timerProgressBar: true
+                        });
+                        
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Berhasil Logout'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    }, 300);
+                }
+            });
         }
     </script>
 </body>
