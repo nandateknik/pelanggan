@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nanda Teknik - Booking</title>
+  <title>Nanda Teknik - Booking & Client App</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -14,6 +14,8 @@
     .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-radius: 2.5rem; }
     .hist-card { transition: all 0.2s ease; border: 1px solid #f1f5f9; }
     .hist-card:hover { border-color: #3b82f6; transform: translateY(-2px); }
+    input:focus { border-color: #3b82f6; outline: none; ring: 2px; }
+    .btn-gradient { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
   </style>
 </head>
 <body class="p-4" onload="checkAutoLogin()">
@@ -29,7 +31,7 @@
       </div>
 
       <div id="footer-menu" class="mt-6 pt-4 border-t flex justify-between items-center px-2">
-         <button onclick="formHistory()" class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Riwayat & Nota</button>
+         <button onclick="formHistory()" class="text-[9px] font-black text-slate-400 uppercase tracking-tighter hover:text-blue-600 transition">Riwayat & Nota</button>
          <button id="btn-logout" onclick="handleLogout()" class="hidden text-[9px] font-black text-red-500 uppercase">Logout</button>
       </div>
     </div>
@@ -39,16 +41,23 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  // --- KONFIGURASI API (GANTI URL INI) ---
+  // --- KONFIGURASI API ---
   const API_URL = "https://script.google.com/macros/s/AKfycbxHd3UxIj66vQ-NEIwhyJVBxGJ7OLofdQ4QjM011erOhinJEpXKW6-3dnniZ130W9CdPw/exec"; 
 
   async function callAPI(action, data = {}) {
-    const params = new URLSearchParams({ action, ...data });
-    const response = await fetch(`${API_URL}?${params.toString()}`);
-    return await response.json();
+    try {
+      const params = new URLSearchParams({ action, ...data });
+      const response = await fetch(`${API_URL}?${params.toString()}`);
+      if (!response.ok) throw new Error('Network response was not ok');
+      return await response.json();
+    } catch (error) {
+      console.error("API Error:", error);
+      Swal.fire('Koneksi Gagal', 'Pastikan URL API di-deploy sebagai "Anyone".', 'error');
+      throw error;
+    }
   }
 
-  // --- LOGIKA APLIKASI ---
+  // --- STATE APLIKASI ---
   let map, marker, selectedPos, customerData;
   let currentPage = 1; 
   const itemsPerPage = 5; 
@@ -71,9 +80,7 @@
       } else {
         showLandingPage();
       }
-    } catch (e) {
-      showLandingPage();
-    }
+    } catch (e) { showLandingPage(); }
   }
 
   function resetUI() {
@@ -97,6 +104,40 @@
     setTimeout(() => map.invalidateSize(), 200);
   }
 
+  // --- FITUR DAFTAR ---
+  function formDaftar() {
+    document.getElementById('dynamic-area').innerHTML = `
+      <div class="space-y-4">
+        <h3 class="font-black text-blue-600 italic uppercase">Pendaftaran</h3>
+        <input id="reg_nama" type="text" placeholder="Nama Lengkap" class="w-full p-4 border rounded-2xl text-sm bg-slate-50">
+        <input id="reg_email" type="email" placeholder="Email Aktif" class="w-full p-4 border rounded-2xl text-sm bg-slate-50">
+        <input id="reg_wa" type="number" placeholder="Nomor WhatsApp" class="w-full p-4 border rounded-2xl text-sm bg-slate-50">
+        <div class="space-y-1">
+          <label class="text-[9px] font-bold text-slate-400 uppercase ml-2">Tanggal Lahir</label>
+          <input id="reg_tgl" type="date" class="w-full p-4 border rounded-2xl text-sm bg-slate-50">
+        </div>
+        <button onclick="handleRegister()" class="w-full bg-blue-600 text-white py-5 rounded-3xl font-bold shadow-xl">Daftar Sekarang</button>
+        <button onclick="showLandingPage()" class="w-full text-slate-400 py-2 text-[10px] font-black uppercase">Kembali</button>
+      </div>`;
+  }
+
+  async function handleRegister() {
+    const data = {
+      nama: document.getElementById('reg_nama').value,
+      email: document.getElementById('reg_email').value,
+      whatsapp: document.getElementById('reg_wa').value,
+      tgl_lahir: document.getElementById('reg_tgl').value,
+      lat: selectedPos?.lat,
+      lng: selectedPos?.lng
+    };
+    if (!data.nama || !data.email || !data.lat) return Swal.fire('Data Kurang', 'Lengkapi data dan lokasi.', 'warning');
+    
+    Swal.fire({ title: 'Mendaftarkan...', didOpen: () => Swal.showLoading() });
+    const res = await callAPI('registerCustomer', data);
+    Swal.fire('Berhasil', res, 'success').then(() => showLandingPage());
+  }
+
+  // --- LOGIKA MAPS ---
   function initBookingMap(lat, lng) {
     const container = document.getElementById('map-booking-container') || document.getElementById('map-container');
     const mapEl = document.getElementById('map');
@@ -108,17 +149,16 @@
       map.setView([lat, lng], 17);
       if (marker) map.removeLayer(marker);
       marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-      marker.bindPopup("<div class='text-[10px] font-bold uppercase'>Geser Pin ke Lokasi</div>").openPopup();
       marker.on('dragend', function () {
         const pos = marker.getLatLng();
         selectedPos = { lat: pos.lat, lng: pos.lng };
-        updateOngkosDisplay(pos.lat, pos.lng);
+        if (document.getElementById('txt-ongkos')) updateOngkosDisplay(pos.lat, pos.lng);
       });
     }, 300);
   }
 
   function getLocation() {
-    Swal.fire({ title: 'Mencari Lokasi...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    Swal.fire({ title: 'Mencari Lokasi...', didOpen: () => Swal.showLoading() });
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         selectedPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
@@ -126,42 +166,34 @@
         if (document.getElementById('txt-ongkos')) updateOngkosDisplay(selectedPos.lat, selectedPos.lng);
         if (document.getElementById('action-buttons')) document.getElementById('action-buttons').classList.remove('hidden');
         Swal.close();
-      }, 
-      (err) => {
-        Swal.close();
-        Swal.fire('GPS Gagal','Silakan geser pin manual.','warning');
-        initBookingMap(-8.2192, 114.3691);
+      }, (err) => {
+        Swal.fire('GPS Mati','Geser pin manual.','warning');
+        initBookingMap(-8.1925, 114.3820);
         if (document.getElementById('action-buttons')) document.getElementById('action-buttons').classList.remove('hidden');
       }, { enableHighAccuracy: true }
     );
   }
 
+  // --- FITUR BOOKING ---
   function showBookingForm() {
     document.getElementById('dynamic-area').innerHTML = `
       <div class="space-y-4">
         <h3 class="font-black text-blue-600 text-xl italic uppercase tracking-tighter">Order Form</h3>
-        <div class="space-y-1">
-           <label class="text-[9px] font-bold text-slate-400 uppercase ml-2">Tanggal Rencana</label>
-           <input id="bk_tgl" type="date" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none text-sm font-semibold">
-        </div>
-        <div class="space-y-1">
-           <label class="text-[9px] font-bold text-slate-400 uppercase ml-2">Pekerjaan</label>
-           <input id="bk_job" type="text" placeholder="Contoh: Cuci AC" class="w-full p-4 border rounded-2xl outline-none text-sm font-semibold">
-        </div>
-        <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
-          <label class="flex items-center gap-3 text-sm font-bold text-blue-600 cursor-pointer">
-            <input type="checkbox" id="is_home" checked onchange="toggleBookingMap(this.checked)"> Alamat Rumah
-          </label>
+        <input id="bk_tgl" type="date" class="w-full p-4 border rounded-2xl bg-slate-50 text-sm font-semibold">
+        <input id="bk_job" type="text" placeholder="Jenis Pekerjaan (Contoh: Cuci AC)" class="w-full p-4 border rounded-2xl text-sm font-semibold">
+        <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 flex items-center gap-3">
+          <input type="checkbox" id="is_home" checked onchange="toggleBookingMap(this.checked)" class="w-4 h-4 text-blue-600">
+          <label for="is_home" class="text-sm font-bold text-blue-600 uppercase">Gunakan Alamat Rumah</label>
         </div>
         <div id="booking-map-area" class="hidden space-y-3">
-          <div id="map-booking-container" class="h-[250px] rounded-3xl overflow-hidden bg-slate-100"></div>
-          <button onclick="getLocation()" class="w-full bg-slate-800 text-white py-3 rounded-2xl font-bold text-[10px] uppercase">📍 Update Lokasi</button>
+          <div id="map-booking-container" class="h-[200px] rounded-3xl overflow-hidden bg-slate-100"></div>
+          <button onclick="getLocation()" class="w-full bg-slate-800 text-white py-2 rounded-xl text-[10px] font-bold">📍 UPDATE LOKASI</button>
         </div>
-        <div class="p-4 bg-orange-50 rounded-2xl border border-orange-100 flex justify-between items-center shadow-sm">
-          <span class="text-[10px] font-black text-orange-600 uppercase italic">Transport</span>
+        <div class="p-4 bg-orange-50 rounded-2xl border border-orange-100 flex justify-between items-center">
+          <span class="text-[10px] font-black text-orange-600 uppercase italic">Ongkos Transport</span>
           <span id="txt-ongkos" class="font-black text-orange-700 text-sm">Rp0</span>
         </div>
-        <button onclick="handleBooking()" class="w-full bg-blue-600 text-white py-5 rounded-3xl font-black uppercase shadow-xl">Kirim Pesanan</button>
+        <button onclick="handleBooking()" class="w-full btn-gradient text-white py-5 rounded-3xl font-black uppercase shadow-xl">Kirim Pesanan</button>
       </div>`;
     updateOngkosDisplay(customerData.lat, customerData.lng);
   }
@@ -180,62 +212,75 @@
   }
 
   async function updateOngkosDisplay(lat, lng) {
-    const biaya = await callAPI('hitungTransport', { lat, lng });
-    document.getElementById('txt-ongkos').innerText = biaya === 0 ? "GRATIS" : `Rp${biaya.toLocaleString()}`;
+    try {
+      const biaya = await callAPI('hitungTransport', { lat, lng });
+      document.getElementById('txt-ongkos').innerText = biaya === 0 ? "GRATIS" : `Rp${biaya.toLocaleString()}`;
+    } catch(e) {}
   }
 
+  // --- FITUR RIWAYAT & PDF ---
   async function formHistory() {
     let email = customerData ? customerData.email : null;
     if (!email) {
-      const res = await Swal.fire({ title: 'Masukkan Email', input: 'email' });
+      const res = await Swal.fire({ title: 'Riwayat Layanan', input: 'email', inputPlaceholder: 'Masukkan email Anda' });
       if (res.value) fetchHistory(res.value);
     } else fetchHistory(email);
   }
 
   async function fetchHistory(email) {
-    Swal.fire({ title: 'Memuat...', didOpen: () => Swal.showLoading() });
-    const data = await callAPI('getCustomerHistory', { email });
-    Swal.close();
-    window.myHist = data ? data.reverse() : []; 
-    filteredData = [...window.myHist]; 
-    currentPage = 1; 
-    
-    document.getElementById('dynamic-area').innerHTML = `
-      <div class="space-y-4">
-        <h3 class="font-bold text-slate-700 uppercase text-[10px] italic ml-2">Riwayat</h3>
-        <input type="text" oninput="handleSearch(this.value)" placeholder="Cari..." class="w-full p-4 border rounded-2xl text-sm outline-none">
-        <div id="hist-list" class="space-y-3 min-h-[200px]"></div>
-        <div id="pagination-ctrl" class="flex justify-between items-center px-4 py-2 bg-white rounded-2xl shadow-sm border">
-          <button id="prevBtn" onclick="changePage(-1)" class="text-[10px] font-black text-blue-600 uppercase">⬅️ Prev</button>
-          <span id="pageInfo" class="text-[10px] font-bold text-slate-400 uppercase"></span>
-          <button id="nextBtn" onclick="changePage(1)" class="text-[10px] font-black text-blue-600 uppercase">Next ➡️</button>
-        </div>
-        <button onclick="customerData ? resetUI() : showLandingPage()" class="w-full text-slate-400 py-2 text-[10px] font-black uppercase">Kembali</button>
-      </div>`;
-    renderHistory();
+    Swal.fire({ title: 'Memuat data...', didOpen: () => Swal.showLoading() });
+    try {
+      const data = await callAPI('getCustomerHistory', { email });
+      Swal.close();
+      window.myHist = data || [];
+      filteredData = [...window.myHist];
+      currentPage = 1;
+      
+      document.getElementById('dynamic-area').innerHTML = `
+        <div class="space-y-4">
+          <h3 class="font-bold text-slate-700 uppercase text-[10px] italic ml-2">Riwayat & Nota</h3>
+          <input type="text" oninput="handleSearch(this.value)" placeholder="Cari ID..." class="w-full p-4 border rounded-2xl text-sm">
+          <div id="hist-list" class="space-y-3 min-h-[200px]"></div>
+          <div id="pagination-ctrl" class="flex justify-between items-center px-4 py-2 bg-white rounded-2xl shadow-sm border">
+            <button onclick="changePage(-1)" class="text-[10px] font-black text-blue-600">PREV</button>
+            <span id="pageInfo" class="text-[10px] font-bold text-slate-400"></span>
+            <button onclick="changePage(1)" class="text-[10px] font-black text-blue-600">NEXT</button>
+          </div>
+          <button onclick="customerData ? resetUI() : showLandingPage()" class="w-full text-slate-400 py-2 text-[10px] font-black uppercase">Kembali</button>
+        </div>`;
+      renderHistory();
+    } catch(e) { Swal.fire('Gagal', 'Gagal memuat riwayat.', 'error'); }
   }
 
   function renderHistory() {
     const list = document.getElementById('hist-list');
-    const maxPage = Math.ceil(filteredData.length / itemsPerPage);
+    if(filteredData.length === 0) { list.innerHTML = "<div class='text-center py-10 text-slate-400 text-xs uppercase'>Kosong</div>"; return; }
+    
     const itemsToShow = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
     list.innerHTML = itemsToShow.map(i => {
-      const typeStyle = i.tipe === 'ORDER' ? 'text-orange-500 bg-orange-50' : 'text-blue-500 bg-blue-50';
+      const isNota = i.tipe === 'NOTA';
       return `
-        <div class="p-4 bg-white rounded-3xl shadow-sm border border-slate-50">
+        <div class="p-4 bg-white rounded-3xl shadow-sm border border-slate-50 hist-card">
           <div class="flex justify-between mb-2">
-            <span class="${typeStyle} px-2 py-0.5 rounded text-[8px] font-black">${i.tipe}</span>
-            <span class="text-[8px] font-black uppercase">● ${i.st || 'TUNGGU'}</span>
+            <span class="${isNota ? 'bg-blue-50 text-blue-600' : 'bg-orange-50 text-orange-600'} px-2 py-0.5 rounded text-[8px] font-black uppercase">${i.tipe}</span>
+            <span class="text-[8px] font-black uppercase text-slate-500">● ${i.st}</span>
           </div>
-          <p class="text-[11px] font-black text-slate-700 uppercase leading-tight mb-2">#${i.id} - ${i.info}</p>
+          <p class="text-[11px] font-black text-slate-700 uppercase mb-2">#${i.id} - ${i.info}</p>
           <div class="flex justify-between items-center pt-2 border-t border-dashed">
             <span class="text-[9px] text-slate-400 font-bold">${i.tgl}</span>
-            ${(i.tipe === 'NOTA') ? `<button onclick="sendPDF('${i.tipe}','${i.id}')" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-[9px] font-black">PDF</button>` : ''}
+            ${isNota ? `<button onclick="printPDF('${i.id}')" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-[9px] font-black shadow-lg">CETAK NOTA</button>` : ''}
           </div>
         </div>`;
     }).join('');
-    document.getElementById('pageInfo').innerText = `${currentPage} / ${maxPage}`;
+    document.getElementById('pageInfo').innerText = `${currentPage} / ${Math.ceil(filteredData.length/itemsPerPage)}`;
+  }
+
+  async function printPDF(id) {
+    Swal.fire({ title: 'Menyiapkan PDF...', text: 'Nota akan dikirim ke email Anda.', didOpen: () => Swal.showLoading() });
+    try {
+      const res = await callAPI('sendDocumentPDF', { type: 'Nota', id: id, email: customerData?.email || prompt("Kirim ke email mana?") });
+      Swal.fire('Terkirim!', res, 'success');
+    } catch(e) { Swal.fire('Gagal', 'Sistem PDF sedang sibuk.', 'error'); }
   }
 
   function handleSearch(val) {
@@ -243,13 +288,16 @@
     filteredData = window.myHist.filter(i => JSON.stringify(i).toLowerCase().includes(key));
     currentPage = 1; renderHistory();
   }
+  function changePage(delta) { 
+    const max = Math.ceil(filteredData.length/itemsPerPage);
+    if(currentPage + delta > 0 && currentPage + delta <= max) { currentPage += delta; renderHistory(); }
+  }
 
-  function changePage(delta) { currentPage += delta; renderHistory(); }
-
+  // --- AUTH ---
   async function formLogin() {
-    const res = await Swal.fire({ title: 'Masuk Akun', input: 'email', confirmButtonText: 'Cek Akun' });
+    const res = await Swal.fire({ title: 'Login', input: 'email', inputPlaceholder: 'Email Terdaftar' });
     if (res.value) {
-      Swal.fire({ title: 'Mengecek...', didOpen: () => Swal.showLoading() });
+      Swal.fire({ title: 'Otentikasi...', didOpen: () => Swal.showLoading() });
       const resApi = await callAPI('checkCustomer', { email: res.value });
       if (resApi.exists && resApi.active) {
         customerData = resApi.data;
@@ -264,11 +312,11 @@
   async function handleBooking() {
     const job = document.getElementById('bk_job').value; 
     const tgl = document.getElementById('bk_tgl').value;
-    if(!job || !tgl) return Swal.fire('Lengkapi Data','','warning');
+    if(!job || !tgl) return Swal.fire('Data Belum Lengkap','','warning');
     const bPos = (document.getElementById('is_home').checked) ? customerData : selectedPos;
     Swal.fire({ title: 'Mengirim...', didOpen: () => Swal.showLoading() });
     await callAPI('saveBooking', { tanggal: tgl, pekerjaan: job, email: customerData.email, lat: bPos.lat, lng: bPos.lng });
-    Swal.fire('Berhasil!','Pesanan diterima.','success'); resetUI();
+    Swal.fire('Berhasil!','Pesanan diterima.','success').then(() => resetUI());
   }
 
   function handleLogout() {
