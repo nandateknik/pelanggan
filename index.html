@@ -155,9 +155,15 @@
             updateOngkos(customerData.lat, customerData.lng);
         }
 
-        async function updateOngkos(lat, lng) {
-            const biaya = await callAPI('hitungTransport', { lat, lng });
-            document.getElementById('txt-ongkos').innerText = biaya === 0 ? "GRATIS" : `Rp${biaya.toLocaleString()}`;
+      async function updateOngkos(lat, lng) {
+            const res = await callAPI('hitungTransport', { lat, lng });
+            // Ambil res.biaya karena server mengirimkan { status: "success", biaya: 5000 }
+            const nilaiBiaya = (res && typeof res.biaya !== 'undefined') ? res.biaya : 0;
+            
+            const target = document.getElementById('txt-ongkos');
+            if (target) {
+                target.innerText = nilaiBiaya === 0 ? "GRATIS" : `Rp${nilaiBiaya.toLocaleString('id-ID')}`;
+            }
         }
 
         function toggleBookingMap(isHome) {
