@@ -462,7 +462,43 @@ function showInstallBanner() {
             });
         }
     });
-}                                                    
+}        window.addEventListener('load', async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get('action');
+    const email = urlParams.get('email');
+
+    if (action === 'activate' && email) {
+        // Tampilkan loading loader
+        Swal.fire({
+            title: 'Mengaktifkan Akun...',
+            text: 'Mohon tunggu sebentar',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+        });
+
+        try {
+            // Panggil API Google Script
+            const response = await fetch(`${API_URL}?action=activateAPI&email=${encodeURIComponent(email)}`);
+            const res = await response.json();
+
+            if (res.status === "success") {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: 'Akun Anda kini aktif. Silakan login.',
+                    confirmButtonColor: '#2563eb'
+                }).then(() => {
+                    // Bersihkan URL dari parameter agar tidak aktivasi ulang saat refresh
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                });
+            } else {
+                Swal.fire('Gagal', res.message, 'error');
+            }
+        } catch (error) {
+            Swal.fire('Error', 'Gagal terhubung ke server', 'error');
+        }
+    }
+});                                            
     </script>
     
 </body>
