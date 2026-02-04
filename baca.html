@@ -3,51 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Baca Artikel - Nanda Teknik</title>
+    <title>Detail Artikel - Nanda Teknik</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: white; }
-        .mobile-container { max-width: 480px; min-height: 100vh; margin: 0 auto; }
-        .article-content { line-height: 1.8; font-size: 0.95rem; color: #374151; }
-        .article-content img { border-radius: 2rem; margin: 1.5rem 0; width: 100% !important; height: auto !important; }
-        .article-content h1, .article-content h2 { font-weight: 800; color: #111827; margin-top: 1.5rem; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #ffffff; color: #1E293B; }
+        .article-content { line-height: 1.8; font-size: 1rem; }
+        .article-content img { border-radius: 2.5rem; margin: 2rem 0; width: 100% !important; height: auto !important; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); }
+        .article-content h2 { font-weight: 800; font-size: 1.25rem; margin-top: 2rem; color: #0F172A; }
+        .article-content p { margin-bottom: 1.25rem; }
+        iframe { width: 100% !important; border-radius: 1.5rem; margin: 1rem 0; }
     </style>
 </head>
-<body>
-    <div class="mobile-container pb-10">
-        <header class="p-6 flex items-center sticky top-0 bg-white/90 backdrop-blur-md z-50">
-            <button onclick="history.back()" class="p-2 bg-gray-50 rounded-xl mr-4 shadow-sm">
-                <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+<body class="bg-gray-50">
+    <div class="max-w-[480px] min-height-screen mx-auto bg-white shadow-2xl relative">
+        
+        <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md px-6 py-5 flex items-center border-bottom border-gray-100">
+            <button onclick="history.back()" class="w-10 h-10 flex items-center justify-center bg-slate-50 rounded-2xl active:scale-90 transition-all">
+                <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
             </button>
-            <span class="font-bold text-gray-800 tracking-tight">Detail Artikel</span>
+            <h1 class="ml-4 font-extrabold text-slate-900 tracking-tight">Baca Artikel</h1>
         </header>
 
-        <main class="px-6">
-            <h1 id="postTitle" class="text-2xl font-extrabold text-gray-900 mb-2 leading-tight"></h1>
-            <p id="postDate" class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6"></p>
-            
-            <div id="postBody" class="article-content">
+        <main class="px-6 pb-20">
+            <div id="loader" class="animate-pulse space-y-4 mt-6">
+                <div class="h-8 bg-gray-100 rounded-xl w-3/4"></div>
+                <div class="h-64 bg-gray-100 rounded-[2.5rem] w-full"></div>
+                <div class="h-4 bg-gray-100 rounded-xl w-full"></div>
+                <div class="h-4 bg-gray-100 rounded-xl w-5/6"></div>
+            </div>
+
+            <div id="mainContent" class="hidden opacity-0 transition-opacity duration-500 mt-6">
+                <div id="postMeta" class="mb-4">
+                    <span class="bg-blue-50 text-blue-600 text-[10px] font-black px-3 py-1 rounded-lg uppercase tracking-widest">Informasi Teknik</span>
                 </div>
+                <h1 id="postTitle" class="text-2xl font-extrabold text-slate-900 leading-tight mb-4"></h1>
+                <p id="postDate" class="text-xs text-slate-400 font-medium mb-8 flex items-center">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Dimuat pada <span class="ml-1" id="dateVal"></span>
+                </p>
+                
+                <div id="postBody" class="article-content text-slate-600">
+                    </div>
+            </div>
         </main>
     </div>
 
     <script>
-        // Ambil data dari localStorage
-        const data = JSON.parse(localStorage.getItem('readingPost'));
+        // 1. Ambil ID dari URL
+        const params = new URLSearchParams(window.location.search);
+        const postId = params.get('id');
 
-        if (!data) {
+        if (!postId) {
             window.location.href = 'berita.html';
         } else {
-            document.getElementById('postTitle').innerText = data.title;
-            document.getElementById('postDate').innerText = data.date;
-            document.getElementById('postBody').innerHTML = data.content;
+            // 2. Panggil data dari Blogger berdasarkan judul/ID
+            // Kita cari feed yang cocok dengan slug judul tadi
+            const script = document.createElement('script');
+            script.src = `https://www.nandateknik.com/feeds/posts/default?alt=json&q=${postId}&callback=renderDetail`;
+            document.body.appendChild(script);
+        }
+
+        function renderDetail(data) {
+            const entry = data.feed.entry ? data.feed.entry[0] : null;
             
-            // Bersihkan gaya bawaan blogger yang bikin rusak layout
+            if (!entry) {
+                document.getElementById('postTitle').innerText = "Artikel tidak ditemukan";
+                return;
+            }
+
+            // Sembunyikan Loader & Munculkan Konten
+            document.getElementById('loader').classList.add('hidden');
+            const main = document.getElementById('mainContent');
+            main.classList.remove('hidden');
+            setTimeout(() => main.classList.add('opacity-100'), 50);
+
+            // Isi Data
+            document.getElementById('postTitle').innerText = entry.title.$t;
+            document.getElementById('dateVal').innerText = new Date(entry.published.$t).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            
+            // Render Konten & Bersihkan inline style dari Blogger
+            let content = entry.content.$t;
+            document.getElementById('postBody').innerHTML = content;
+
+            // Fix Gambar Blogger yang bandel
             const images = document.querySelectorAll('#postBody img');
             images.forEach(img => {
                 img.removeAttribute('style');
-                img.removeAttribute('height');
                 img.removeAttribute('width');
+                img.removeAttribute('height');
             });
         }
     </script>
