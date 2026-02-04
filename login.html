@@ -10,24 +10,20 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         .mobile-container { max-width: 480px; min-height: 100vh; margin: 0 auto; background: #f9fafb; }
-        .loader {
-            border: 3px solid #f3f3f3;
-            border-radius: 50%;
-            border-top: 3px solid #2563eb;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        input:focus { transform: scale(1.02); }
+        .transition-all { transition: all 0.3s ease; }
     </style>
 </head>
 <body class="bg-gray-200">
 
     <script>
-        // PROTEKSI: Jika session masih ada, langsung ke dashboard
-        if (localStorage.getItem('userPelanggan')) {
+        // PROTEKSI: Jika session sudah ada dan VALID (punya lat lang), langsung ke dashboard
+        const session = JSON.parse(localStorage.getItem('userPelanggan'));
+        if (session && session.lat && session.lang) {
             window.location.replace('dashboard.html');
+        } else if (session) {
+            // Jika ada session tapi rusak (lat lang undefined), hapus saja biar login ulang
+            localStorage.removeItem('userPelanggan');
         }
     </script>
 
@@ -40,7 +36,7 @@
                 </svg>
             </div>
             <h1 class="text-3xl font-bold text-gray-800 tracking-tight">Login Pelanggan</h1>
-            <p class="text-gray-400 mt-2 text-sm font-medium">Masukkan email terdaftar Anda</p>
+            <p class="text-gray-400 mt-2 text-sm font-medium italic">Nanda Teknik Banyuwangi</p>
         </div>
 
         <div class="bg-white p-8 rounded-[3rem] shadow-sm border border-gray-100">
@@ -71,19 +67,19 @@
     </div>
 
     <script>
-        // GANTI DENGAN URL WEB APP GOOGLE SCRIPT ANDA
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbxKjQEb6t2cpt1hTV1Ts4mZvk5Mr2YulVw5h5s-B7sB6PjyBlH5C1uENxSZGU3Rlc9Fow/exec';
+        // URL Web App Google Script Anda
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyUOVdkpEZLHF6L8_sm_ESHU1I9Uj4AlrpkNbpqXFOjNqzuwcAeaTQ-dEbjQyuOw5aQWQ/exec';
 
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const btn = document.getElementById('btnLogin');
-            const emailValue = document.getElementById('email').value;
+            const emailValue = document.getElementById('email').value.trim().toLowerCase();
 
-            // Loading state dengan SweetAlert
+            // Loading state modern
             Swal.fire({
-                title: 'Memverifikasi...',
-                text: 'Mohon tunggu sebentar',
+                title: 'Sedang Masuk...',
+                html: 'Menghubungkan ke server Nanda Teknik',
                 allowOutsideClick: false,
                 didOpen: () => { Swal.showLoading() }
             });
@@ -100,21 +96,31 @@
             .then(res => res.json())
             .then(data => {
                 if(data.status === 'success') {
-                    // PERBAIKAN: Menyimpan lat & lang dari Apps Script ke localStorage
+                    // --- LOGIKA PENGAMAN LAT LANG ---
+                    // Memastikan data koordinat benar-benar angka dan tidak undefined
+                    const safeLat = data.lat ? parseFloat(data.lat) : null;
+                    const safeLang = data.lang ? parseFloat(data.lang) : null;
+
+                    if (safeLat === null || safeLang === null) {
+                        Swal.fire('Data Belum Lengkap', 'Koordinat rumah Anda belum terdaftar di sistem. Silakan hubungi admin.', 'warning');
+                        return;
+                    }
+
                     const userData = {
                         nama: data.nama,
-                        email: data.email || emailValue,
-                        lat: data.lat,    // Disimpan agar tidak undefined di booking
-                        lang: data.lang,  // Disimpan agar tidak undefined di booking
+                        email: emailValue,
+                        lat: safeLat,
+                        lang: safeLang,
                         loginAt: new Date().toISOString()
                     };
 
+                    // Simpan data bersih ke LocalStorage
                     localStorage.setItem('userPelanggan', JSON.stringify(userData));
 
                     Swal.fire({
                         icon: 'success',
-                        title: 'Berhasil!',
-                        text: `Selamat datang kembali, ${data.nama}`,
+                        title: 'Berhasil Masuk',
+                        text: `Halo ${data.nama}, selamat datang kembali!`,
                         showConfirmButton: false,
                         timer: 1500
                     }).then(() => {
@@ -125,7 +131,7 @@
                     Swal.fire({
                         icon: 'warning',
                         title: 'Akun Belum Aktif',
-                        text: data.message,
+                        text: 'Silakan cek email Anda untuk aktivasi akun.',
                         confirmButtonColor: '#2563eb'
                     });
                 } else {
@@ -133,17 +139,13 @@
                         icon: 'error',
                         title: 'Login Gagal',
                         text: data.message || 'Email tidak ditemukan.',
-                        confirmButtonColor: '#2563eb'
+                        confirmButtonColor: '#ef4444'
                     });
                 }
             })
             .catch(err => {
                 console.error(err);
-                Swal.fire('Oops!', 'Koneksi bermasalah. Coba lagi.', 'error');
-            })
-            .finally(() => {
-                btn.disabled = false;
-                btn.innerHTML = 'Masuk Sekarang';
+                Swal.fire('Masalah Koneksi', 'Gagal menghubungi server. Pastikan internet aktif.', 'error');
             });
         });
     </script>
