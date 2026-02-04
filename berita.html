@@ -57,72 +57,80 @@
     </div>
 
     <script>
-        let startIndex = 1;
-        const maxResults = 1; // Tampilkan 1 berita per halaman agar fokus
+let startIndex = 1;
+const maxResults = 1;
 
-        function fetchNews(index) {
-            const wrapper = document.getElementById('newsWrapper');
-            // Ganti nandateknik.com dengan URL blogspot Anda jika belum custom domain
-            const url = `https://www.nandateknik.com/feeds/posts/default?alt=json&start-index=${index}&max-results=${maxResults}`;
+function fetchNews(index) {
+    const wrapper = document.getElementById('newsWrapper');
+    wrapper.innerHTML = `
+        <div class="space-y-4">
+            <div class="skeleton h-48 w-full rounded-[2rem]"></div>
+            <div class="skeleton h-6 w-3/4 rounded-lg"></div>
+        </div>`;
 
-            fetch(url)
-            .then(res => res.json())
-            .then(data => {
-                const entries = data.feed.entry;
-                if (!entries) {
-                    wrapper.innerHTML = `<div class="text-center p-10 text-gray-400 italic">Tidak ada berita lagi.</div>`;
-                    document.getElementById('nextBtn').disabled = true;
-                    return;
-                }
+    // Hapus script lama jika ada
+    const oldScript = document.getElementById('bloggerScript');
+    if (oldScript) oldScript.remove();
 
-                let html = entries.map(post => {
-                    const title = post.title.$t;
-                    const content = post.content.$t;
-                    const published = new Date(post.published.$t).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-                    // Mencari image pertama dari konten
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = content;
-                    const firstImg = tempDiv.querySelector('img')?.src || 'https://via.placeholder.com/400x250?text=Nanda+Teknik';
+    // Buat script tag baru (JSONP)
+    const script = document.createElement('script');
+    script.id = 'bloggerScript';
+    // Gunakan callback=handleResponse
+    script.src = `https://www.nandateknik.com/feeds/posts/default?alt=json&start-index=${index}&max-results=${maxResults}&callback=handleResponse`;
+    
+    document.body.appendChild(script);
+}
 
-                    return `
-                        <article class="bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-gray-50">
-                            <img src="${firstImg}" class="w-full h-56 object-cover" alt="Thumb">
-                            <div class="p-6">
-                                <div class="flex items-center space-x-2 mb-3">
-                                    <span class="bg-blue-100 text-blue-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Tips & Info</span>
-                                    <span class="text-gray-400 text-[10px] font-medium">${published}</span>
-                                </div>
-                                <h2 class="text-xl font-bold text-gray-800 leading-tight mb-4">${title}</h2>
-                                <div class="news-content text-sm text-gray-600 leading-relaxed overflow-hidden">
-                                    ${content}
-                                </div>
-                            </div>
-                        </article>
-                    `;
-                }).join('');
+// Fungsi ini yang akan menerima data dari Blogger
+function handleResponse(data) {
+    const wrapper = document.getElementById('newsWrapper');
+    const entries = data.feed.entry;
 
-                wrapper.innerHTML = html;
-                
-                // Update Button States
-                document.getElementById('prevBtn').disabled = (index <= 1);
-                document.getElementById('nextBtn').disabled = (entries.length < maxResults);
-                
-                // Scroll to top
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            })
-            .catch(err => {
-                wrapper.innerHTML = `<div class="text-center p-10 text-red-400 italic">Gagal memuat berita. Periksa koneksi atau URL blog.</div>`;
-            });
-        }
+    if (!entries) {
+        wrapper.innerHTML = `<div class="text-center p-10 text-gray-400 italic">Tidak ada berita lagi.</div>`;
+        document.getElementById('nextBtn').disabled = true;
+        return;
+    }
 
-        function changePage(dir) {
-            startIndex += (dir * maxResults);
-            if (startIndex < 1) startIndex = 1;
-            fetchNews(startIndex);
-        }
+    let html = entries.map(post => {
+        const title = post.title.$t;
+        const content = post.content.$t;
+        const published = new Date(post.published.$t).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = content;
+        const firstImg = tempDiv.querySelector('img')?.src || 'https://via.placeholder.com/400x250?text=Nanda+Teknik';
 
-        // Load berita pertama kali
-        window.onload = () => fetchNews(startIndex);
+        return `
+            <article class="bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-gray-100 animate-fade-in">
+                <img src="${firstImg}" class="w-full h-56 object-cover" alt="Thumb">
+                <div class="p-6">
+                    <div class="flex items-center space-x-2 mb-3">
+                        <span class="bg-blue-100 text-blue-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Tips & Info</span>
+                        <span class="text-gray-400 text-[10px] font-medium">${published}</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-800 leading-tight mb-4">${title}</h2>
+                    <div class="news-content text-sm text-gray-600 leading-relaxed">
+                        ${content}
+                    </div>
+                </div>
+            </article>
+        `;
+    }).join('');
+
+    wrapper.innerHTML = html;
+    document.getElementById('prevBtn').disabled = (startIndex <= 1);
+    document.getElementById('nextBtn').disabled = (entries.length < maxResults);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function changePage(dir) {
+    startIndex += (dir * maxResults);
+    if (startIndex < 1) startIndex = 1;
+    fetchNews(startIndex);
+}
+
+window.onload = () => fetchNews(startIndex);
     </script>
 </body>
 </html>
