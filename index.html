@@ -2,439 +2,155 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nanda Teknik</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Login Pelanggan - Nanda Teknik</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <link href='https://raw.githack.com/nandateknik/blogger/main/manifest.json' rel='manifest'/>
+    <link href='https://raw.githack.com/nandateknik/blogger/main/manifest.json' rel='manifest'/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
-        #map { height: 100%; width: 100%; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 2rem; border: 1px solid white; }
-        input:focus { border-color: #3b82f6 !important; outline: none; }
+        body { font-family: 'Inter', sans-serif; }
+        .mobile-container { max-width: 480px; min-height: 100vh; margin: 0 auto; background: #f9fafb; }
+        input:focus { transform: scale(1.02); }
+        .transition-all { transition: all 0.3s ease; }
     </style>
 </head>
-<body class="p-4 bg-slate-50">
-    <div class="max-w-md mx-auto space-y-4">
-        <header class="text-center py-4">
-            <h1 class="text-3xl font-black text-blue-600 italic uppercase tracking-tighter">NANDA TEKNIK</h1>
-            <div id="user-badge" class="hidden text-[10px] font-bold text-slate-500 bg-white inline-block px-3 py-1 rounded-full border shadow-sm mt-2 uppercase tracking-widest"></div>
-        </header>
+<body class="bg-gray-200">
 
-        <div id="main-card" class="glass p-6 shadow-xl min-h-[400px]">
-            <div id="dynamic-area">
-                <div class="text-center py-10 text-slate-400 animate-pulse font-bold">MENGHUBUNGKAN...</div>
-            </div>
-
-            <div id="footer-menu" class="mt-6 pt-4 border-t flex justify-between items-center px-2">
-                <button onclick="formHistory()" class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Riwayat & Nota</button>
-                <button id="btn-logout" onclick="handleLogout()" class="hidden text-[10px] font-black text-red-500 uppercase">Logout</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="map-storage" class="hidden"><div id="map"></div></div>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // --- KONFIGURASI API ---
-        const API_URL = "https://script.google.com/macros/s/AKfycbwDabr7sHlOqlKcUUT0BCoMBnjTJC-DwZ9-WpWTpltviEh5zR4O2zLvgN91FIdOFUNqKA/exec";
-
-        let map, marker, selectedPos, customerData;
-        let currentPage = 1, itemsPerPage = 5, filteredData = [];
-
-        // --- CORE ENGINE ---
-        window.onload = function() {
-            initMap();
-            checkAutoLogin();
-        };
-
-        async function callAPI(action, data = {}) {
-            const params = new URLSearchParams({ action, ...data });
-            try {
-                const response = await fetch(`${API_URL}?${params.toString()}`, { redirect: 'follow' });
-                return await response.json();
-            } catch (err) {
-                console.error(err);
-                return { status: "error", message: "Gagal terhubung ke server." };
-            }
-        }
-
-        function initMap() {
-            if (!map) {
-                map = L.map('map', { zoomControl: false }).setView([-8.1925, 114.3820], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-            }
-        }
-
-        function checkAutoLogin() {
-            const saved = localStorage.getItem('nanda_teknik_user');
-            if (saved && saved !== "undefined") {
-                customerData = JSON.parse(saved);
-                resetUI();
-            } else {
-                showLandingPage();
-            }
-        }
-
-        function resetUI() {
-            document.getElementById('user-badge').innerText = `Halo, ${customerData.nama}`;
-            document.getElementById('user-badge').classList.remove('hidden');
-            document.getElementById('btn-logout').classList.remove('hidden');
-            showBookingForm();
-        }
-
-        // --- TAMPILAN 1: LANDING PAGE ---
-        function showLandingPage() {
-            const dynamicArea = document.getElementById('dynamic-area');
-            dynamicArea.innerHTML = `
-                <h3 class="font-bold text-slate-700 mb-2 italic uppercase text-xs">📍 Tentukan Lokasi Anda</h3>
-                <div id="map-container" class="rounded-3xl overflow-hidden bg-slate-100 h-[250px] border relative"></div>
-                <button onclick="getLocation()" class="w-full mt-4 bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition">CARI LOKASI SAYA</button>
-                <div id="action-buttons" class="hidden mt-6 grid grid-cols-2 gap-4">
-                    <button onclick="formLogin()" class="bg-blue-600 text-white py-4 rounded-3xl font-bold shadow-md uppercase text-xs">Login</button>
-                    <button onclick="formDaftar()" class="bg-slate-800 text-white py-4 rounded-3xl font-bold shadow-md uppercase text-xs">Daftar</button>
-                </div>`;
-            
-            document.getElementById('map-container').appendChild(document.getElementById('map'));
-            setTimeout(() => { map.invalidateSize(); }, 200);
-        }
-
-        function getLocation() {
-            Swal.fire({ title: 'Mencari Lokasi...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-            navigator.geolocation.getCurrentPosition((pos) => {
-                selectedPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-                map.setView([selectedPos.lat, selectedPos.lng], 17);
-                if (marker) map.removeLayer(marker);
-                marker = L.marker([selectedPos.lat, selectedPos.lng], {draggable: true}).addTo(map);
-                
-                // Jika di form booking, update ongkos
-                if(document.getElementById('txt-ongkos')) updateOngkos(selectedPos.lat, selectedPos.lng);
-                
-                document.getElementById('action-buttons')?.classList.remove('hidden');
-                Swal.close();
-            }, () => {
-                Swal.fire("GPS Gagal", "Pindahkan pin secara manual pada peta.", "warning");
-                document.getElementById('action-buttons')?.classList.remove('hidden');
-            });
-        }
-
-        // --- TAMPILAN 2: FORM BOOKING ---
-        function showBookingForm() {
-            document.getElementById('dynamic-area').innerHTML = `
-                <div class="space-y-4">
-                    <h3 class="font-black text-blue-600 uppercase italic">Formulir Pesanan</h3>
-                    <div class="space-y-1">
-                        <label class="text-[9px] font-bold text-slate-400 uppercase ml-2">Tanggal Rencana Servis</label>
-                        <input id="bk_tgl" type="date" class="w-full p-4 border rounded-2xl bg-slate-50 text-sm font-semibold">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[9px] font-bold text-slate-400 uppercase ml-2">Pekerjaan / Keluhan</label>
-                        <input id="bk_job" type="text" placeholder="Contoh: Cuci AC 2 Unit" class="w-full p-4 border rounded-2xl text-sm font-semibold">
-                    </div>
-                    
-                    <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
-                        <label class="flex items-center gap-3 text-sm font-bold text-blue-600 cursor-pointer">
-                            <input type="checkbox" id="is_home" checked onchange="toggleBookingMap(this.checked)"> Gunakan Alamat Rumah
-                        </label>
-                    </div>
-
-                    <div id="booking-map-area" class="hidden space-y-3">
-                        <div id="map-booking-container" class="h-[200px] rounded-3xl overflow-hidden border"></div>
-                        <button onclick="getLocation()" class="w-full bg-slate-800 text-white py-2 rounded-xl font-bold text-[10px] uppercase">📍 Update GPS</button>
-                    </div>
-
-                    <div class="p-4 bg-orange-50 rounded-2xl border border-orange-100 flex justify-between items-center">
-                        <span class="text-[10px] font-black text-orange-600 uppercase italic">Estimasi Transport</span>
-                        <span id="txt-ongkos" class="font-black text-orange-700 text-sm">Rp0</span>
-                    </div>
-
-                    <button onclick="handleBooking()" class="w-full bg-blue-600 text-white py-5 rounded-3xl font-black uppercase shadow-xl active:scale-95 transition-all mt-2">Kirim Pesanan</button>
-                </div>`;
-            
-            updateOngkos(customerData.lat, customerData.lng);
-        }
-
-      async function updateOngkos(lat, lng) {
-            const res = await callAPI('hitungTransport', { lat, lng });
-            // Ambil res.biaya karena server mengirimkan { status: "success", biaya: 5000 }
-            const nilaiBiaya = (res && typeof res.biaya !== 'undefined') ? res.biaya : 0;
-            
-            const target = document.getElementById('txt-ongkos');
-            if (target) {
-                target.innerText = nilaiBiaya === 0 ? "GRATIS" : `Rp${nilaiBiaya.toLocaleString('id-ID')}`;
-            }
-        }
-
-        function toggleBookingMap(isHome) {
-            const area = document.getElementById('booking-map-area');
-            if (!isHome) {
-                area.classList.remove('hidden');
-                document.getElementById('map-booking-container').appendChild(document.getElementById('map'));
-                const lat = selectedPos?.lat || customerData.lat;
-                const lng = selectedPos?.lng || customerData.lng;
-                setTimeout(() => {
-                    map.invalidateSize();
-                    map.setView([lat, lng], 17);
-                    if (marker) map.removeLayer(marker);
-                    marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-                    marker.on('dragend', () => {
-                        const p = marker.getLatLng();
-                        selectedPos = { lat: p.lat, lng: p.lng };
-                        updateOngkos(p.lat, p.lng);
-                    });
-                }, 200);
-            } else {
-                area.classList.add('hidden');
-                document.getElementById('map-storage').appendChild(document.getElementById('map'));
-                selectedPos = null;
-                updateOngkos(customerData.lat, customerData.lng);
-            }
-        }
-
-        async function handleBooking() {
-            const job = document.getElementById('bk_job').value;
-            const tgl = document.getElementById('bk_tgl').value;
-            if(!job || !tgl) return Swal.fire('Lengkapi Data','','warning');
-            
-            const pos = document.getElementById('is_home').checked ? customerData : selectedPos;
-            if(!pos) return Swal.fire('Lokasi?', 'Tentukan lokasi servis di peta.', 'warning');
-
-            Swal.fire({ title: 'Mengirim Pesanan...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-            const res = await callAPI('saveBooking', { tanggal: tgl, pekerjaan: job, email: customerData.email, lat: pos.lat, lng: pos.lng });
-            
-            if(res && res.id) {
-                Swal.fire('Berhasil!','Pesanan Anda telah kami terima.','success');
-                showBookingForm();
-            }
-        }
-
-        // --- TAMPILAN 3: RIWAYAT & SEARCH ---
-        async function fetchHistory(email) {
-            Swal.fire({ title: 'Memuat Data...', didOpen: () => Swal.showLoading() });
-            const data = await callAPI('getCustomerHistory', { email });
-            Swal.close();
-            
-            if(data && Array.isArray(data)) {
-                window.myHist = data; // Data sudah di-reverse oleh Apps Script
-                filteredData = [...window.myHist];
-                currentPage = 1;
-                renderHistory();
-            } else {
-                Swal.fire("Kosong", "Belum ada riwayat layanan.", "info");
-            }
-        }
-
-        function formHistory() {
-            const email = customerData ? customerData.email : null;
-            if (!email) {
-                Swal.fire({ title: 'Masukkan Email', input: 'email' }).then(res => { if (res.value) fetchHistory(res.value); });
-            } else fetchHistory(email);
-        }
-
-        function renderHistory() {
-            const dynamic = document.getElementById('dynamic-area');
-            const start = (currentPage - 1) * itemsPerPage;
-            const items = filteredData.slice(start, start + itemsPerPage);
-            const maxPage = Math.ceil(filteredData.length / itemsPerPage) || 1;
-
-            dynamic.innerHTML = `
-                <div class="space-y-4">
-                    <h3 class="font-bold text-slate-700 uppercase text-[10px] italic tracking-widest ml-2">Riwayat Layanan</h3>
-                    <input type="text" oninput="handleSearch(this.value)" placeholder="Cari ID / Jasa..." class="w-full p-4 border rounded-2xl bg-white text-sm outline-none shadow-sm">
-                    
-                    <div id="hist-list" class="space-y-3 min-h-[200px]">
-                        ${items.map(i => {
-                            const typeStyle = i.tipe === 'ORDER' ? 'text-orange-500 bg-orange-50' : 'text-blue-500 bg-blue-50';
-                            return `
-                                <div class="p-4 bg-white rounded-3xl shadow-sm border border-slate-50 relative overflow-hidden">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <span class="${typeStyle} px-2 py-0.5 rounded-lg text-[8px] font-black uppercase">${i.tipe}</span>
-                                        <span class="text-[8px] font-black uppercase text-slate-400 bg-slate-100 px-3 py-1 rounded-full">${i.st || 'Selesai'}</span>
-                                    </div>
-                                    <p class="text-[11px] font-black text-slate-700 uppercase leading-tight">#${i.id} - ${i.info}</p>
-                                    <div class="flex justify-between items-center pt-2 mt-2 border-t border-dashed border-slate-100">
-                                        <span class="text-[9px] text-slate-400 font-bold">${i.tgl}</span>
-                                        ${(i.tipe !== 'ORDER') ? `<button onclick="sendPDF('${i.tipe}','${i.id}')" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-[9px] font-black shadow-md">PDF</button>` : ''}
-                                    </div>
-                                </div>`;
-                        }).join('')}
-                    </div>
-
-                    <div class="flex justify-between items-center px-4 py-2 bg-white rounded-2xl shadow-sm border border-slate-50">
-                        <button onclick="changePage(-1)" ${currentPage===1?'disabled':''} class="text-[10px] font-black text-blue-600 uppercase disabled:opacity-20">⬅️ Prev</button>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${currentPage} / ${maxPage}</span>
-                        <button onclick="changePage(1)" ${currentPage>=maxPage?'disabled':''} class="text-[10px] font-black text-blue-600 uppercase disabled:opacity-20">Next ➡️</button>
-                    </div>
-                    
-                    <button onclick="customerData ? resetUI() : showLandingPage()" class="w-full text-slate-400 py-2 text-[10px] font-black uppercase tracking-[0.2em]">Kembali</button>
-                </div>`;
-        }
-
-        function handleSearch(val) {
-            filteredData = window.myHist.filter(i => JSON.stringify(i).toLowerCase().includes(val.toLowerCase()));
-            currentPage = 1;
-            renderHistory();
-        }
-
-        function changePage(delta) {
-            currentPage += delta;
-            renderHistory();
-        }
-
-        async function sendPDF(type, id) {
-            Swal.fire({ title: 'Mengirim PDF ke Email...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-            const res = await callAPI('sendDocumentPDF', { type, id, email: customerData.email });
-            Swal.fire('Info', typeof res === 'object' ? res.message : res, 'info');
-        }
-
-        // --- AUTH & LAINNYA ---
-        async function formDaftar() {
-            if (!selectedPos) return Swal.fire("Lokasi?", "Cari lokasi Anda di peta dulu.", "warning");
-            
-            document.getElementById('dynamic-area').innerHTML = `
-                <div class="space-y-4">
-                    <h3 class="font-black text-blue-600 uppercase italic">Pendaftaran</h3>
-                    <input id="reg_nama" type="text" placeholder="Nama Lengkap" class="w-full p-4 border rounded-2xl text-sm bg-slate-50">
-                    <input id="reg_email" type="email" placeholder="Email Aktif" class="w-full p-4 border rounded-2xl text-sm bg-slate-50">
-                    <input id="reg_wa" type="number" placeholder="WhatsApp" class="w-full p-4 border rounded-2xl text-sm bg-slate-50">
-                    <input id="reg_tgl" type="date" class="w-full p-4 border rounded-2xl text-sm bg-slate-50">
-                    <button onclick="handleRegister()" class="w-full bg-blue-600 text-white py-5 rounded-3xl font-bold shadow-xl">DAFTAR SEKARANG</button>
-                    <button onclick="showLandingPage()" class="w-full text-slate-400 py-2 text-[10px] font-black uppercase">Kembali</button>
-                </div>`;
-        }
-
-        async function handleRegister() {
-            const d = {
-                nama: document.getElementById('reg_nama').value,
-                email: document.getElementById('reg_email').value,
-                whatsapp: document.getElementById('reg_wa').value,
-                tgl_lahir: document.getElementById('reg_tgl').value,
-                lat: selectedPos.lat,
-                lng: selectedPos.lng
-            };
-            if(!d.nama || !d.email) return Swal.fire("Lengkapi Data","","warning");
-
-            Swal.fire({ title: 'Mendaftarkan...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-            const res = await callAPI('registerCustomer', d);
-            Swal.fire("Selesai", typeof res === 'object' ? res.message : res, "success").then(() => location.reload());
-        }
-
-       async function formLogin() {
-            const { value: email } = await Swal.fire({ 
-                title: 'LOGIN', 
-                input: 'email', 
-                inputPlaceholder: 'Email Terdaftar',
-                confirmButtonText: 'CEK AKUN',
-                confirmButtonColor: '#2563eb'
-            });
-
-            if (email) {
-                Swal.fire({ title: 'Mengecek...', didOpen: () => Swal.showLoading() });
-                const res = await callAPI('checkCustomer', { email });
-                
-                if (res && res.exists) {
-                    if (!res.active) {
-                        // JIKA BELUM AKTIF, TAWARKAN REAKTIVASI
-                        Swal.fire({
-                            title: 'Akun Belum Aktif',
-                            text: 'Email aktivasi sudah dikirim saat pendaftaran. Belum menerima atau link kadaluwarsa?',
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonColor: '#2563eb',
-                            cancelButtonColor: '#64748b',
-                            confirmButtonText: 'Kirim Ulang Email',
-                            cancelButtonText: 'Nanti Saja'
-                        }).then(async (result) => {
-                            if (result.isConfirmed) {
-                                handleReactivation(email);
-                            }
-                        });
-                    } else {
-                        // LOGIN SUKSES
-                        customerData = res.data;
-                        localStorage.setItem('nanda_teknik_user', JSON.stringify(res.data));
-                        location.reload();
-                    }
-                } else {
-                    Swal.fire('Gagal', 'Email tidak ditemukan.', 'error');
-                }
-            }
-        }
-
-        // FUNGSI BARU UNTUK MENGHUBUNGKAN KE API REAKTIVASI
-        async function handleReactivation(email) {
-            Swal.fire({ title: 'Mengirim...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-            const res = await callAPI('requestReactivation', { email });
-            Swal.fire({
-                title: 'Selesai',
-                text: typeof res === 'object' ? res.message : res,
-                icon: 'info',
-                confirmButtonColor: '#2563eb'
-            });
-        }
-
-        function handleLogout() {
-            Swal.fire({
-                title: 'Logout?',
-                text: "Anda akan keluar dari sesi layanan Nanda Teknik.",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444', // Red-500
-                cancelButtonColor: '#64748b',  // Slate-500
-                confirmButtonText: 'YA, KELUAR',
-                cancelButtonText: 'BATAL',
-                reverseButtons: true,
-                background: '#ffffff',
-                borderRadius: '2rem',
-                customClass: {
-                    title: 'font-black uppercase italic tracking-tighter',
-                    popup: 'glass'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Efek visual sebelum reload
-                    const mainCard = document.getElementById('main-card');
-                    mainCard.style.transition = 'all 0.5s ease';
-                    mainCard.style.opacity = '0';
-                    mainCard.style.transform = 'scale(0.9) translateY(20px)';
-                    mainCard.style.filter = 'blur(10px)';
-
-                    setTimeout(() => {
-                        localStorage.removeItem('nanda_teknik_user');
-                        
-                        // Beri notifikasi singkat (Toast) sebelum benar-benar reload
-                        const Toast = Swal.mixin({
-                            toast: true,
-                            position: 'top-end',
-                            showConfirmButton: false,
-                            timer: 1500,
-                            timerProgressBar: true
-                        });
-                        
-                        Toast.fire({
-                            icon: 'success',
-                            title: 'Berhasil Logout'
-                        }).then(() => {
-                            location.reload();
-                        });
-                    }, 300);
-                }
-            });
+        // PROTEKSI: Jika session sudah ada dan VALID (punya lat lang), langsung ke dashboard
+        const session = JSON.parse(localStorage.getItem('userPelanggan'));
+        if (session && session.lat && session.lang) {
+            window.location.replace('dashboard.html');
+        } else if (session) {
+            // Jika ada session tapi rusak (lat lang undefined), hapus saja biar login ulang
+            localStorage.removeItem('userPelanggan');
         }
     </script>
-    <script>
-                        // Register Service Worker
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('PWA Ready!'))
-            .catch(err => console.log('PWA Failed', err));
-    });
-}
 
-// Fitur "Add to Home Screen" Otomatis
+    <div class="mobile-container shadow-2xl flex flex-col justify-center px-8 py-12">
+        
+        <div class="text-center mb-12">
+            <div class="bg-blue-600 w-24 h-24 rounded-[2.5rem] mx-auto mb-6 flex items-center justify-center shadow-2xl shadow-blue-200 transform -rotate-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-800 tracking-tight">Login Pelanggan</h1>
+            <p class="text-gray-400 mt-2 text-sm font-medium italic">Nanda Teknik Banyuwangi</p>
+        </div>
+
+        <div class="bg-white p-8 rounded-[3rem] shadow-sm border border-gray-100">
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase ml-2 mb-2 tracking-widest">Alamat Email</label>
+                    <input type="email" id="email" placeholder="nama@email.com" 
+                        class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all font-medium text-gray-700" required>
+                </div>
+
+                <button type="submit" id="btnLogin" 
+                    class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all flex justify-center items-center">
+                    Masuk Sekarang
+                </button>
+            </form>
+
+            <div class="mt-10 text-center">
+                <p class="text-gray-400 text-xs font-semibold uppercase tracking-widest">Belum punya akun?</p>
+                <a href="daftar.html" class="inline-block mt-3 text-blue-600 font-bold text-sm border-b-2 border-blue-50 hover:border-blue-600 transition-all">
+                    Daftar Member Baru
+                </a>
+            </div>
+        </div>
+
+        <footer class="mt-12 text-center text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em]">
+            &copy; 2026 Nanda Teknik Service
+        </footer>
+    </div>
+
+    <script>
+        // URL Web App Google Script Anda
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyUOVdkpEZLHF6L8_sm_ESHU1I9Uj4AlrpkNbpqXFOjNqzuwcAeaTQ-dEbjQyuOw5aQWQ/exec';
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('btnLogin');
+            const emailValue = document.getElementById('email').value.trim().toLowerCase();
+
+            // Loading state modern
+            Swal.fire({
+                title: 'Sedang Masuk...',
+                html: 'Menghubungkan ke server Nanda Teknik',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading() }
+            });
+
+            const payload = {
+                action: 'login',
+                email: emailValue
+            };
+
+            fetch(scriptURL, { 
+                method: 'POST', 
+                body: JSON.stringify(payload) 
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    // --- LOGIKA PENGAMAN LAT LANG ---
+                    // Memastikan data koordinat benar-benar angka dan tidak undefined
+                    const safeLat = data.lat ? parseFloat(data.lat) : null;
+                    const safeLang = data.lang ? parseFloat(data.lang) : null;
+
+                    if (safeLat === null || safeLang === null) {
+                        Swal.fire('Data Belum Lengkap', 'Koordinat rumah Anda belum terdaftar di sistem. Silakan hubungi admin.', 'warning');
+                        return;
+                    }
+
+                    const userData = {
+                        nama: data.nama,
+                        email: emailValue,
+                        lat: safeLat,
+                        lang: safeLang,
+                        loginAt: new Date().toISOString()
+                    };
+
+                    // Simpan data bersih ke LocalStorage
+                    localStorage.setItem('userPelanggan', JSON.stringify(userData));
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil Masuk',
+                        text: `Halo ${data.nama}, selamat datang kembali!`,
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        window.location.href = 'dashboard.html';
+                    });
+
+                } else if(data.status === 'pending') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Akun Belum Aktif',
+                        text: 'Silakan cek email Anda untuk aktivasi akun.',
+                        confirmButtonColor: '#2563eb'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Login Gagal',
+                        text: data.message || 'Email tidak ditemukan.',
+                        confirmButtonColor: '#ef4444'
+                    });
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire('Masalah Koneksi', 'Gagal menghubungi server. Pastikan internet aktif.', 'error');
+            });
+        });
+
+        // Fitur "Add to Home Screen" Otomatis
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
@@ -462,7 +178,7 @@ function showInstallBanner() {
             });
         }
     });
-}                             
+}          
     </script>
     
 </body>
