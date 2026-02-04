@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Aktivasi Akun</title>
+</head>
+<body class="bg-blue-50 flex items-center justify-center min-h-screen p-6">
+    <div class="max-w-sm w-full bg-white p-8 rounded-[3rem] shadow-2xl text-center">
+        <div id="loading">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-gray-600">Memverifikasi akun Anda...</p>
+        </div>
+
+        <div id="success" class="hidden">
+            <div class="text-6xl mb-4">🎉</div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">Akun Aktif!</h1>
+            <p class="text-gray-500 mb-6">Selamat, akun Anda telah berhasil diaktifkan. Anda sekarang dapat menggunakan semua layanan kami.</p>
+            <a href="index.html" class="block w-full bg-blue-600 text-white py-3 rounded-2xl font-bold">Masuk ke Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        // Cek parameter status dari URL yang dikirim oleh doGet
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('status') === 'success') {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('success').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
