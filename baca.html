@@ -49,51 +49,48 @@
         </main>
     </div>
 
-    <script>
-        // 1. Ambil ID dari URL
-        const params = new URLSearchParams(window.location.search);
-        const postId = params.get('id');
-
-        if (!postId) {
+<script>
+    window.onload = function() {
+        // 1. Ambil data dari sessionStorage
+        const rawData = sessionStorage.getItem('currentRead');
+        
+        if (!rawData) {
+            // Kalau data kosong, balik ke berita.html
             window.location.href = 'berita.html';
-        } else {
-            // 2. Panggil data dari Blogger berdasarkan judul/ID
-            // Kita cari feed yang cocok dengan slug judul tadi
-            const script = document.createElement('script');
-            script.src = `https://www.nandateknik.com/feeds/posts/default?alt=json&q=${postId}&callback=renderDetail`;
-            document.body.appendChild(script);
+            return;
         }
 
-        function renderDetail(data) {
-            const entry = data.feed.entry ? data.feed.entry[0] : null;
-            
-            if (!entry) {
-                document.getElementById('postTitle').innerText = "Artikel tidak ditemukan";
-                return;
-            }
+        const data = JSON.parse(rawData);
 
-            // Sembunyikan Loader & Munculkan Konten
-            document.getElementById('loader').classList.add('hidden');
-            const main = document.getElementById('mainContent');
-            main.classList.remove('hidden');
-            setTimeout(() => main.classList.add('opacity-100'), 50);
+        // 2. Sembunyikan Loader & Munculkan Konten
+        document.getElementById('loader').classList.add('hidden');
+        const main = document.getElementById('mainContent');
+        main.classList.remove('hidden');
+        setTimeout(() => main.classList.add('opacity-100'), 50);
 
-            // Isi Data
-            document.getElementById('postTitle').innerText = entry.title.$t;
-            document.getElementById('dateVal').innerText = new Date(entry.published.$t).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-            
-            // Render Konten & Bersihkan inline style dari Blogger
-            let content = entry.content.$t;
-            document.getElementById('postBody').innerHTML = content;
+        // 3. Masukkan Data ke HTML
+        document.getElementById('postTitle').innerText = data.title;
+        document.getElementById('dateVal').innerText = data.date;
+        
+        // Render Konten
+        const postBody = document.getElementById('postBody');
+        postBody.innerHTML = data.content;
 
-            // Fix Gambar Blogger yang bandel
-            const images = document.querySelectorAll('#postBody img');
-            images.forEach(img => {
-                img.removeAttribute('style');
-                img.removeAttribute('width');
-                img.removeAttribute('height');
-            });
-        }
-    </script>
+        // 4. Bersihkan Gambar agar Responsif & Bagus
+        const images = postBody.querySelectorAll('img');
+        images.forEach(img => {
+            img.removeAttribute('style');
+            img.removeAttribute('width');
+            img.removeAttribute('height');
+            img.className = "w-full rounded-[2rem] my-6 shadow-lg";
+        });
+        
+        // Bersihkan link yang membungkus gambar (biasanya dari Blogger)
+        const imageLinks = postBody.querySelectorAll('a[href*=".jpg"], a[href*=".png"], a[href*=".jpeg"]');
+        imageLinks.forEach(link => {
+            link.onclick = (e) => e.preventDefault(); // Matikan klik gambar biar gak buka tab baru
+        });
+    };
+</script>
 </body>
 </html>
