@@ -3,87 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cek Ongkos Akomodasi - Nanda Teknik</title>
+    <title>Cek Ongkos - Nanda Teknik</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         .mobile-container { max-width: 480px; min-height: 100vh; margin: 0 auto; background: #f9fafb; position: relative; }
-        #map { height: 350px; width: 100%; border-radius: 2rem; z-index: 1; }
-        .result-card { transform: translateY(-50px); z-index: 10; position: relative; }
+        #map { height: 400px; width: 100%; z-index: 1; border-bottom-left-radius: 3rem; border-bottom-right-radius: 3rem; }
+        .floating-card { transform: translateY(-80px); z-index: 20; position: relative; }
+        .bottom-nav { max-width: 480px; left: 50%; transform: translateX(-50%); }
+        /* Custom Marker Pulse Effect */
+        .pulse { 
+            background: rgba(37, 99, 235, 0.2); border-radius: 50%; height: 20px; width: 20px; 
+            position: absolute; left: 50%; top: 50%; margin: -10px 0px 0px -10px; 
+            animation: pulsate 1.5s ease-out; animation-iteration-count: infinite; opacity: 0;
+        }
+        @keyframes pulsate { 0% {transform: scale(0.1, 0.1); opacity: 0.0;} 50% {opacity: 1.0;} 100% {transform: scale(1.2, 1.2); opacity: 0.0;} }
     </style>
 </head>
 <body class="bg-gray-200">
 
-    <div class="mobile-container shadow-2xl flex flex-col pb-32">
+    <div class="mobile-container shadow-2xl flex flex-col pb-24">
         
-        <header class="bg-white pt-10 pb-6 px-6 rounded-b-[2.5rem] shadow-sm flex items-center justify-between">
-            <a href="dashboard.html" class="p-2 bg-gray-50 rounded-xl">
-                <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        <div class="relative">
+            <div id="map" class="shadow-lg"></div>
+            
+            <a href="dashboard.html" class="absolute top-10 left-6 z-[1000] bg-white/90 backdrop-blur-md p-3 rounded-2xl shadow-xl border border-white/50 active:scale-90 transition-all">
+                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             </a>
-            <h1 class="text-lg font-bold text-gray-800">Estimasi Akomodasi</h1>
-            <div class="w-10"></div>
-        </header>
 
-        <main class="flex-grow p-4">
-            <div class="relative">
-                <div id="map" class="shadow-inner border-4 border-white"></div>
-                <button onclick="locateUser()" class="absolute bottom-4 right-4 bg-white p-3 rounded-full shadow-lg z-[1000] border border-gray-100">
-                    <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>
-                </button>
-            </div>
+            <button onclick="locateUser()" class="absolute bottom-24 right-6 z-[1000] bg-blue-600 p-4 rounded-2xl shadow-2xl shadow-blue-300 text-white active:scale-95 transition-all">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </button>
+        </div>
 
-            <div class="result-card px-4">
-                <div class="bg-white rounded-[2rem] p-6 shadow-xl border border-blue-50">
-                    <div class="flex justify-between items-start mb-4">
+        <main class="px-6 floating-card">
+            <div class="bg-white rounded-[3rem] p-8 shadow-2xl shadow-blue-900/10 border border-white relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50"></div>
+                
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-6">
+                        <span class="bg-blue-100 text-blue-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Estimasi Biaya</span>
+                        <div class="flex items-center text-gray-400 text-xs font-medium">
+                            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></span>
+                            Live Calculation
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-end mb-8">
                         <div>
-                            <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Jarak dari Sukowidi</p>
-                            <h2 id="distanceText" class="text-3xl font-black text-gray-800">0 <span class="text-sm font-normal text-gray-400">Km</span></h2>
+                            <p class="text-xs text-gray-400 font-bold uppercase mb-1">Jarak Tempuh</p>
+                            <h2 id="distanceText" class="text-4xl font-black text-gray-800 tracking-tight">0.0 <span class="text-lg font-normal text-gray-400">Km</span></h2>
                         </div>
-                        <div class="bg-blue-50 p-3 rounded-2xl text-blue-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div class="text-right">
+                            <p class="text-xs text-gray-400 font-bold uppercase mb-1">Total Akomodasi</p>
+                            <h2 id="costText" class="text-2xl font-black text-blue-600">Gratis</h2>
                         </div>
                     </div>
 
-                    <div class="space-y-3 border-t border-dashed border-gray-100 pt-4">
-                        <div class="flex justify-between">
-                            <span class="text-gray-500 text-sm">Biaya Akomodasi:</span>
-                            <span id="costText" class="font-bold text-green-600 text-lg">Gratis</span>
+                    <div class="bg-gray-50 rounded-3xl p-5 mb-8 border border-gray-100">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                            <p id="noteText" class="text-[11px] text-gray-500 leading-relaxed font-medium pt-1">
+                                Tarif gratis untuk area Banyuwangi Kota (Radius 5km dari Sukowidi). Selebihnya dikenakan Rp 10.000/km.
+                            </p>
                         </div>
-                        <p id="noteText" class="text-[10px] text-gray-400 italic text-center">* Geser pin biru ke lokasi rumah Anda untuk akurasi biaya.</p>
                     </div>
 
-                    <button class="w-full mt-6 bg-gray-900 text-white py-4 rounded-2xl font-bold shadow-lg shadow-gray-200 hover:bg-black transition-all">
-                        Pesan Servis Sekarang
+                    <button onclick="bookingSekarang()" class="w-full bg-gray-900 text-white py-5 rounded-[2rem] font-bold shadow-xl shadow-gray-300 active:scale-95 transition-all flex items-center justify-center space-x-3">
+                        <span>Pesan Servis Sekarang</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
                     </button>
                 </div>
             </div>
         </main>
 
-        </div>
+        <nav class="bottom-nav fixed bottom-6 px-6 w-full z-[2000]">
+            <div class="bg-gray-900/95 backdrop-blur-lg rounded-[2.5rem] p-4 flex justify-around items-center shadow-2xl border border-white/10">
+                <a href="dashboard.html" class="p-2 text-gray-400"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg></a>
+                <a href="booking.html" class="p-2 text-gray-400"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg></a>
+                <a href="nota.html" class="p-2 text-gray-400"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></a>
+            </div>
+        </nav>
+    </div>
 
     <script>
-        // Titik Tengah Rumah (Sukowidi)
         const sukowidiLoc = [-8.1832, 114.3727]; 
-        const banyuwangiKotaRadius = 5; // Radius gratis (Km)
+        const banyuwangiKotaRadius = 5;
         const costPerKm = 10000;
 
-        // Inisialisasi Map
-        const map = L.map('map').setView(sukowidiLoc, 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
+        const map = L.map('map', { zoomControl: false }).setView(sukowidiLoc, 13);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
 
-        // Marker Rumah Nanda (Sukowidi) - Merah
-        L.circle(sukowidiLoc, {radius: 500, color: 'red', fillOpacity: 0.1}).addTo(map);
+        // Marker Rumah Nanda (Red)
         L.marker(sukowidiLoc, {icon: L.icon({
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
             iconSize: [25, 41], iconAnchor: [12, 41]
-        })}).addTo(map).bindPopup("Nanda Teknik (Sukowidi)");
+        })}).addTo(map);
 
-        // Marker Pelanggan - Biru (Bisa Digeser)
+        // Marker User (Blue - Draggable)
         let customerMarker = L.marker(sukowidiLoc, {
             draggable: true,
             icon: L.icon({
@@ -93,54 +116,51 @@
             })
         }).addTo(map);
 
-        // Fungsi Hitung Jarak (Haversine Formula)
         function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371; 
+            const R = 6371;
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
         function updateInfo(latlng) {
             const dist = calculateDistance(sukowidiLoc[0], sukowidiLoc[1], latlng.lat, latlng.lng);
-            const roundedDist = dist.toFixed(1);
-            
-            document.getElementById('distanceText').innerHTML = `${roundedDist} <span class="text-sm font-normal text-gray-400">Km</span>`;
+            document.getElementById('distanceText').innerHTML = `${dist.toFixed(1)} <span class="text-lg font-normal text-gray-400">Km</span>`;
 
-            let cost = 0;
             if (dist > banyuwangiKotaRadius) {
-                // Jika diluar kota (lebih dari 5km), hitung per km
-                cost = Math.ceil(dist) * costPerKm;
+                let cost = Math.ceil(dist) * costPerKm;
                 document.getElementById('costText').innerText = `Rp ${cost.toLocaleString('id-ID')}`;
-                document.getElementById('costText').classList.replace('text-green-600', 'text-blue-600');
+                document.getElementById('costText').style.color = "#2563eb";
             } else {
                 document.getElementById('costText').innerText = "Gratis";
-                document.getElementById('costText').classList.replace('text-blue-600', 'text-green-600');
+                document.getElementById('costText').style.color = "#16a34a";
             }
         }
 
-        // Event saat pin digeser
-        customerMarker.on('dragend', function(e) {
-            updateInfo(e.target.getLatLng());
-        });
+        customerMarker.on('dragend', (e) => updateInfo(e.target.getLatLng()));
 
-        // Fungsi Deteksi Lokasi Saya
         function locateUser() {
-            map.locate({setView: true, maxZoom: 16});
+            map.locate({setView: true, maxZoom: 15});
         }
 
-        map.on('locationfound', function(e) {
+        map.on('locationfound', (e) => {
             customerMarker.setLatLng(e.latlng);
             updateInfo(e.latlng);
         });
 
-        map.on('locationerror', function() {
-            alert("Gagal mendapatkan lokasi. Silakan geser pin manual.");
-        });
-
+        function bookingSekarang() {
+            const pos = customerMarker.getLatLng();
+            const dist = calculateDistance(sukowidiLoc[0], sukowidiLoc[1], pos.lat, pos.lng);
+            const ongkos = dist > banyuwangiKotaRadius ? Math.ceil(dist) * costPerKm : 0;
+            
+            // Simpan ke session untuk dipakai di booking.html
+            sessionStorage.setItem('tempLat', pos.lat);
+            sessionStorage.setItem('tempLang', pos.lng);
+            sessionStorage.setItem('tempOngkos', ongkos);
+            
+            window.location.href = 'booking.html';
+        }
     </script>
 </body>
 </html>
