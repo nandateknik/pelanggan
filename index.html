@@ -3,154 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Login Pelanggan - Nanda Teknik</title>
+    <title>Nanda Teknik - Profesional Service</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href='https://raw.githack.com/nandateknik/blogger/main/manifest.json' rel='manifest'/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+        <link href='https://raw.githack.com/nandateknik/blogger/main/manifest.json' rel='manifest'/>
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .mobile-container { max-width: 480px; min-height: 100vh; margin: 0 auto; background: #f9fafb; }
-        input:focus { transform: scale(1.02); }
-        .transition-all { transition: all 0.3s ease; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F8FAFC; }
+        .mobile-container { max-width: 480px; min-height: 100vh; margin: 0 auto; background: #ffffff; position: relative; overflow: hidden; }
+        .card-gradient { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); }
+        
+        /* Animasi Gelembung Identik */
+        .blob { position: absolute; width: 250px; height: 250px; background: rgba(37, 99, 235, 0.15); border-radius: 50%; filter: blur(50px); animation: pulse-slow 10s infinite ease-in-out; z-index: 0; }
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1) translate(0, 0); }
+            50% { transform: scale(1.2) translate(-20px, 20px); }
+        }
+
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.4); }
+        
+        /* Badge Pulse untuk Status Live */
+        .badge-pulse { position: relative; }
+        .badge-pulse::after {
+            content: ""; position: absolute; width: 100%; height: 100%; top: 0; left: 0;
+            background: inherit; border-radius: inherit; animation: ripple 1.5s infinite;
+        }
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
     </style>
 </head>
-<body class="bg-gray-200">
+<body>
 
-    <script>
-        // PROTEKSI: Jika session sudah ada dan VALID (punya lat lang), langsung ke dashboard
-        const session = JSON.parse(localStorage.getItem('userPelanggan'));
-        if (session && session.lat && session.lang) {
-            window.location.replace('dashboard.html');
-        } else if (session) {
-            // Jika ada session tapi rusak (lat lang undefined), hapus saja biar login ulang
-            localStorage.removeItem('userPelanggan');
-        }
-    </script>
+    <div class="mobile-container flex flex-col">
+        <div class="blob -top-20 -right-20"></div>
+        <div class="blob bottom-40 -left-20" style="background: rgba(30, 64, 175, 0.1);"></div>
 
-    <div class="mobile-container shadow-2xl flex flex-col justify-center px-8 py-12">
-        
-        <div class="text-center mb-12">
-            <div class="bg-blue-600 w-24 h-24 rounded-[2.5rem] mx-auto mb-6 flex items-center justify-center shadow-2xl shadow-blue-200 transform -rotate-6">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
+        <header class="relative z-10 pt-20 px-8 pb-10">
+            <div class="w-16 h-16 bg-blue-600 rounded-[2rem] flex items-center justify-center shadow-xl shadow-blue-200 mb-6">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             </div>
-            <h1 class="text-3xl font-bold text-gray-800 tracking-tight">Login Pelanggan</h1>
-            <p class="text-gray-400 mt-2 text-sm font-medium italic">Nanda Teknik Banyuwangi</p>
-        </div>
+            <h1 class="text-4xl font-extrabold text-slate-900 leading-tight tracking-tighter">
+                Solusi Teknik <br><span class="text-blue-600">Tanpa Ribet.</span>
+            </h1>
+            <p class="text-slate-500 mt-4 text-sm font-medium leading-relaxed">
+                Platform booking servis AC & Elektronik terpercaya. Pantau progres pengerjaan secara real-time.
+            </p>
+        </header>
 
-        <div class="bg-white p-8 rounded-[3rem] shadow-sm border border-gray-100">
-            <form id="loginForm" class="space-y-6">
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase ml-2 mb-2 tracking-widest">Alamat Email</label>
-                    <input type="email" id="email" placeholder="nama@email.com" 
-                        class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all font-medium text-gray-700" required>
+        <main class="relative z-10 px-6 space-y-4">
+            <div class="glass rounded-[2.5rem] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-white">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h2 class="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Status Teknisi Hari Ini</h2>
+                        <div class="flex items-center mt-2">
+                            <span class="w-2 h-2 bg-green-500 rounded-full badge-pulse mr-2"></span>
+                            <span class="text-sm font-extrabold text-slate-800 tracking-tight">On-Duty / Lapangan</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] font-black bg-blue-50 text-blue-600 px-3 py-1 rounded-full uppercase">Update: Live</span>
+                    </div>
                 </div>
 
-                <button type="submit" id="btnLogin" 
-                    class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all flex justify-center items-center">
-                    Masuk Sekarang
-                </button>
-            </form>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-slate-50 p-4 rounded-3xl">
+                        <p class="text-[20px] font-black text-slate-800">03</p>
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Antrean Selesai</p>
+                    </div>
+                    <div class="bg-blue-600 p-4 rounded-3xl">
+                        <p class="text-[20px] font-black text-white">02</p>
+                        <p class="text-[9px] font-black text-blue-100 uppercase tracking-widest">Sedang Proses</p>
+                    </div>
+                </div>
 
-            <div class="mt-10 text-center">
-                <p class="text-gray-400 text-xs font-semibold uppercase tracking-widest">Belum punya akun?</p>
-                <a href="daftar.html" class="inline-block mt-3 text-blue-600 font-bold text-sm border-b-2 border-blue-50 hover:border-blue-600 transition-all">
-                    Daftar Member Baru
+                <div class="mt-6 space-y-3">
+                    <div class="flex items-center p-3 bg-white/50 rounded-2xl border border-slate-100">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3 text-blue-600 text-[10px] font-black">1</div>
+                        <div class="flex-1">
+                            <p class="text-[11px] font-black text-slate-800 uppercase tracking-tight">Bpk. Muh*** - AC Split</p>
+                            <p class="text-[9px] font-bold text-green-500 uppercase">Selesai Dikerjakan</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center p-3 bg-white/50 rounded-2xl border border-slate-100">
+                        <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center mr-3 text-amber-600 text-[10px] font-black">2</div>
+                        <div class="flex-1">
+                            <p class="text-[11px] font-black text-slate-800 uppercase tracking-tight">Ibu Lin*** - Kulkas</p>
+                            <p class="text-[9px] font-bold text-amber-500 uppercase italic">Sedang Menuju Lokasi...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-6 space-y-3">
+                <a href="login.html" class="block w-full card-gradient text-white text-center py-5 rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-blue-200 active:scale-95 transition-all">
+                    Masuk ke Dashboard
+                </a>
+                <a href="register.html" class="block w-full bg-white text-slate-800 text-center py-5 rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] border border-slate-100 shadow-sm active:scale-95 transition-all">
+                    Daftar Akun Baru
                 </a>
             </div>
-        </div>
+        </main>
 
-        <footer class="mt-12 text-center text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em]">
-            &copy; 2026 Nanda Teknik Service
+        <footer class="mt-auto py-10 text-center">
+            <p class="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em]">Nanda Teknik &copy; 2026</p>
         </footer>
     </div>
-
-    <script>
-        // URL Web App Google Script Anda
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbyUOVdkpEZLHF6L8_sm_ESHU1I9Uj4AlrpkNbpqXFOjNqzuwcAeaTQ-dEbjQyuOw5aQWQ/exec';
-
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const btn = document.getElementById('btnLogin');
-            const emailValue = document.getElementById('email').value.trim().toLowerCase();
-
-            // Loading state modern
-            Swal.fire({
-                title: 'Sedang Masuk...',
-                html: 'Menghubungkan ke server Nanda Teknik',
-                allowOutsideClick: false,
-                didOpen: () => { Swal.showLoading() }
-            });
-
-            const payload = {
-                action: 'login',
-                email: emailValue
-            };
-
-            fetch(scriptURL, { 
-                method: 'POST', 
-                body: JSON.stringify(payload) 
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === 'success') {
-                    // --- LOGIKA PENGAMAN LAT LANG ---
-                    // Memastikan data koordinat benar-benar angka dan tidak undefined
-                    const safeLat = data.lat ? parseFloat(data.lat) : null;
-                    const safeLang = data.lang ? parseFloat(data.lang) : null;
-
-                    if (safeLat === null || safeLang === null) {
-                        Swal.fire('Data Belum Lengkap', 'Koordinat rumah Anda belum terdaftar di sistem. Silakan hubungi admin.', 'warning');
-                        return;
-                    }
-
-                    const userData = {
-                        nama: data.nama,
-                        email: emailValue,
-                        lat: safeLat,
-                        lang: safeLang,
-                        loginAt: new Date().toISOString()
-                    };
-
-                    // Simpan data bersih ke LocalStorage
-                    localStorage.setItem('userPelanggan', JSON.stringify(userData));
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil Masuk',
-                        text: `Halo ${data.nama}, selamat datang kembali!`,
-                        showConfirmButton: false,
-                        timer: 1500
-                    }).then(() => {
-                        window.location.href = 'dashboard.html';
-                    });
-
-                } else if(data.status === 'pending') {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Akun Belum Aktif',
-                        text: 'Silakan cek email Anda untuk aktivasi akun.',
-                        confirmButtonColor: '#2563eb'
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Login Gagal',
-                        text: data.message || 'Email tidak ditemukan.',
-                        confirmButtonColor: '#ef4444'
-                    });
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                Swal.fire('Masalah Koneksi', 'Gagal menghubungi server. Pastikan internet aktif.', 'error');
-            });
-        });
-
-        // Fitur "Add to Home Screen" Otomatis
+<script>        // Fitur "Add to Home Screen" Otomatis
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
@@ -178,8 +137,6 @@ function showInstallBanner() {
             });
         }
     });
-}          
-    </script>
-    
+}        </script>
 </body>
 </html>
