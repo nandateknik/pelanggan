@@ -39,7 +39,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         // --- KONFIGURASI API ---
-        const API_URL = "https://script.google.com/macros/s/AKfycbx_pbNvLnegVqzxQnQo_ulBQebHzs4CBh9-Iz33VK8H8d04KLoRn5Szo86cQD_WvDM8kA/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbwDabr7sHlOqlKcUUT0BCoMBnjTJC-DwZ9-WpWTpltviEh5zR4O2zLvgN91FIdOFUNqKA/exec";
 
         let map, marker, selectedPos, customerData;
         let currentPage = 1, itemsPerPage = 5, filteredData = [];
@@ -462,76 +462,7 @@ function showInstallBanner() {
             });
         }
     });
-}     
-
-async function prosesAktivasiOtomatis() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const action = urlParams.get('action');
-  const email = urlParams.get('email');
-
-  // Jalankan hanya jika ada parameter action=activate dan email di URL
-  if (action === 'activate' && email) {
-    
-    // 1. Tampilkan Loading
-    Swal.fire({
-      title: 'Memverifikasi Akun',
-      text: 'Mohon tunggu, sedang menghubungkan ke server...',
-      allowOutsideClick: false,
-      didOpen: () => { Swal.showLoading(); }
-    });
-
-    try {
-      // 2. Eksekusi Fetch ke Google Apps Script
-      // KUNCI: Gunakan method GET dan redirect: 'follow'
-      const response = await fetch(`${API_URL}?action=activateAPI&email=${encodeURIComponent(email)}`, {
-        method: 'GET',
-        redirect: 'follow', // Wajib untuk Google Apps Script
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8', // Trik untuk menghindari pre-flight CORS
-        }
-      });
-
-      // 3. Ambil Respon JSON
-      const res = await response.json();
-
-      // 4. Cek Hasil Respon
-      if (res.status === "success" || (typeof res === 'string' && res.includes("Berhasil"))) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Akun Aktif!',
-          text: 'Selamat! Akun Anda sudah aktif. Silakan login sekarang.',
-          confirmButtonColor: '#2563eb',
-          confirmButtonText: 'Siap, Login!'
-        }).then(() => {
-          // Bersihkan URL dari parameter agar tidak aktivasi ulang saat refresh
-          window.history.replaceState({}, document.title, window.location.pathname);
-        });
-      } else {
-        throw new Error(res.message || "Gagal mengaktifkan akun.");
-      }
-
-    } catch (error) {
-      console.error("Detail Error:", error);
-      
-      // 5. Penanganan Error & CORS
-      // Seringkali aktivasi BERHASIL di server tapi browser memblokir respon.
-      // Kita beri pesan yang lebih bersahabat.
-      Swal.fire({
-        icon: 'info',
-        title: 'Cek Status Akun',
-        text: 'Permintaan aktivasi telah dikirim. Jika Anda baru saja mendaftar, silakan coba login langsung.',
-        confirmButtonColor: '#2563eb',
-        footer: 'Catatan: ' + error.message
-      }).then(() => {
-        // Tetap bersihkan URL
-        window.history.replaceState({}, document.title, window.location.pathname);
-      });
-    }
-  }
-}
-
-// Jalankan fungsi saat halaman selesai dimuat
-window.addEventListener('load', prosesAktivasiOtomatis);                        
+}                             
     </script>
     
 </body>
