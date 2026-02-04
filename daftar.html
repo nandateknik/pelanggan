@@ -74,63 +74,73 @@
         </main>
     </div>
 
-    <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbxJd5AACeO2jJzigJgF9n29u2N0Cooaj7GYvL1klmCwz1zZff6ODox7sIL8sIKucTxpdw/exec';
-        let map, marker;
+<script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzLwnHsOwHIlmJw8z7OZlWuRAVckD4dvgL2nXvrfTfBrGfhaQpHhk54vTfw7wcMWjdQNg/exec'; // <-- GANTI DENGAN URL DEPLOY TERBARU
+    let map, marker;
 
-        // Inisialisasi Peta Leaflet
-        function initMap(lat, lng) {
-            map = L.map('map').setView([lat, lng], 16);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-            
-            // Marker bisa digeser (draggable)
-            marker = L.marker([lat, lng], {draggable: true}).addTo(map);
-            
-            // Set value awal koordinat
-            document.getElementById('lat').value = lat;
-            document.getElementById('lang').value = lng;
+    // 1. Inisialisasi Peta Leaflet
+    function initMap(lat, lng) {
+        map = L.map('map').setView([lat, lng], 16);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        
+        marker = L.marker([lat, lng], {draggable: true}).addTo(map);
+        
+        document.getElementById('lat').value = lat;
+        document.getElementById('lang').value = lng;
 
-            // Update koordinat saat marker berhenti digeser
-            marker.on('dragend', function() {
-                const pos = marker.getLatLng();
-                document.getElementById('lat').value = pos.lat;
-                document.getElementById('lang').value = pos.lng;
-            });
-        }
-
-        // Ambil Lokasi GPS User
-        navigator.geolocation.getCurrentPosition(
-            (p) => initMap(p.coords.latitude, p.coords.longitude),
-            () => initMap(-6.1754, 106.8272) // Default ke Monas jika GPS ditolak
-        );
-
-        // Submit Form
-        document.getElementById('regForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btnSubmit');
-            btn.innerText = "Memproses..."; btn.disabled = true;
-
-            const payload = {
-                nama: document.getElementById('nama').value,
-                email: document.getElementById('email').value,
-                tanggal: document.getElementById('tgl_lahir').value, // Tanggal Lahir
-                whatsapp: document.getElementById('whatsapp').value,
-                lat: document.getElementById('lat').value,
-                lang: document.getElementById('lang').value
-            };
-
-            fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload) })
-            .then(res => res.json())
-            .then(res => {
-                alert("Pendaftaran berhasil! Cek email Anda (termasuk folder spam) untuk aktivasi akun.");
-                window.location.href = 'login.html';
-            })
-            .catch(err => {
-                alert("Terjadi kesalahan teknis. Coba lagi.");
-                btn.innerText = "Daftar & Kirim Aktivasi";
-                btn.disabled = false;
-            });
+        marker.on('dragend', function() {
+            const pos = marker.getLatLng();
+            document.getElementById('lat').value = pos.lat;
+            document.getElementById('lang').value = pos.lng;
         });
-    </script>
+    }
+
+    // 2. Ambil Lokasi GPS User
+    navigator.geolocation.getCurrentPosition(
+        (p) => initMap(p.coords.latitude, p.coords.longitude),
+        () => initMap(-6.1754, 106.8272) // Default Jakarta jika GPS mati
+    );
+
+    // 3. PROSES DAFTAR (BAGIAN PALING PENTING)
+    document.getElementById('regForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSubmit');
+        
+        // Animasi Loading
+        btn.innerText = "Mendaftarkan..."; 
+        btn.disabled = true;
+
+        // Ambil Data dari Form
+        const payload = {
+            action: 'register', // WAJIB ADA: Biar Google Script tau ini perintah Daftar
+            nama: document.getElementById('nama').value,
+            email: document.getElementById('email').value,
+            tanggal: document.getElementById('tgl_lahir').value,
+            whatsapp: document.getElementById('whatsapp').value,
+            lat: document.getElementById('lat').value,
+            lang: document.getElementById('lang').value
+        };
+
+        // Kirim Data ke Google Apps Script
+        fetch(scriptURL, { 
+            method: 'POST', 
+            mode: 'no-cors', // SOLUSI CORS: Pakai no-cors agar tidak diblokir browser
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(payload) 
+        })
+        .then(() => {
+            // Karena pakai no-cors, kita nggak bisa baca balasan JSON
+            // Tapi kalau fetch masuk ke .then, artinya data sudah terkirim.
+            alert("PENDAFTARAN BERHASIL!\n\nSilakan cek email Anda (Inbox atau Spam) untuk mengaktifkan akun sebelum login.");
+            window.location.href = 'login.html';
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Waduh, koneksi gagal bre. Coba lagi ya!");
+            btn.innerText = "Daftar & Kirim Aktivasi";
+            btn.disabled = false;
+        });
+    });
+</script>
 </body>
 </html>
