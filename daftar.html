@@ -3,84 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Daftar Pelanggan</title>
+    <title>Daftar Akun Pelanggan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        #map { height: 200px; border-radius: 1rem; margin-bottom: 1rem; z-index: 1; }
+        #map { height: 220px; border-radius: 1.5rem; margin-bottom: 1rem; z-index: 1; border: 2px solid #f3f4f6; }
         .mobile-container { max-width: 480px; min-height: 100vh; margin: 0 auto; background: #f9fafb; }
+        input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.5; }
     </style>
 </head>
-<body class="bg-gray-100">
-    <div class="mobile-container shadow-xl flex flex-col">
-        <header class="p-8 bg-blue-600 text-white rounded-b-[2.5rem]">
-            <h1 class="text-2xl font-bold">Pendaftaran</h1>
-            <p class="text-blue-100">Lengkapi data dan tentukan lokasi Anda.</p>
+<body class="bg-gray-200">
+
+    <script>
+        // PROTEKSI: Jika sudah login, tendang ke dashboard
+        if (localStorage.getItem('userPelanggan')) {
+            window.location.replace('dashboard.html');
+        }
+    </script>
+
+    <div class="mobile-container shadow-2xl flex flex-col">
+        <header class="p-8 bg-blue-600 text-white rounded-b-[3rem] shadow-lg">
+            <h1 class="text-2xl font-bold">Daftar Akun</h1>
+            <p class="text-blue-100 text-sm">Lengkapi data diri dan lokasi Anda.</p>
         </header>
 
         <main class="p-6 -mt-10 flex-grow">
-            <div class="bg-white p-6 rounded-3xl shadow-lg">
+            <div class="bg-white p-6 rounded-[2.5rem] shadow-md">
                 <form id="regForm" class="space-y-4">
-                    <input type="text" id="nama" placeholder="Nama Lengkap" class="w-full p-3 bg-gray-50 border rounded-xl" required>
-                    <input type="email" id="email" placeholder="Email" class="w-full p-3 bg-gray-50 border rounded-xl" required>
-                    <input type="tel" id="whatsapp" placeholder="WhatsApp (08...)" class="w-full p-3 bg-gray-50 border rounded-xl" required>
-                    
-                    <p class="text-xs text-gray-500 font-bold uppercase ml-1">Geser pin ke lokasi Anda:</p>
-                    <div id="map"></div>
-                    <input type="hidden" id="lat"><input type="hidden" id="lang">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase ml-2 mb-1">Nama Lengkap</label>
+                        <input type="text" id="nama" placeholder="Contoh: Budi Santoso" 
+                            class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none" required>
+                    </div>
 
-                    <button type="submit" id="btnSubmit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg">Daftar Sekarang</button>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase ml-2 mb-1">Email Aktif</label>
+                        <input type="email" id="email" placeholder="budi@mail.com" 
+                            class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase ml-2 mb-1">Tanggal Lahir</label>
+                        <input type="date" id="tgl_lahir" 
+                            class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase ml-2 mb-1">Nomor WhatsApp</label>
+                        <input type="tel" id="whatsapp" placeholder="0812xxxx" 
+                            class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase ml-2 mb-2 text-blue-600">Lokasi (Geser Pin Jika Tidak Akurat)</label>
+                        <div id="map"></div>
+                        <input type="hidden" id="lat">
+                        <input type="hidden" id="lang">
+                    </div>
+
+                    <button type="submit" id="btnSubmit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-100 hover:bg-blue-700 active:scale-95 transition-all">
+                        Daftar & Kirim Aktivasi
+                    </button>
                 </form>
+
+                <div class="mt-6 text-center">
+                    <p class="text-sm text-gray-500">Sudah punya akun? <a href="login.html" class="text-blue-600 font-bold">Login</a></p>
+                </div>
             </div>
         </main>
     </div>
 
     <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycby7ov3a5Rz4crWbVQSMIfsesahkBl7UilQ_iCSLRpQzu8h7_a4BHx_6-SeZ6VNbnwQESA/exec';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycby2cUOnGibIiYheo-6zPObkUb8CPiZYaY-inBQ8V0GZgGpM48HYdxjDqSUpKskfXGFXtA/exec';
         let map, marker;
 
-        // Inisialisasi Peta
+        // Inisialisasi Peta Leaflet
         function initMap(lat, lng) {
-            map = L.map('map').setView([lat, lng], 15);
+            map = L.map('map').setView([lat, lng], 16);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            
+            // Marker bisa digeser (draggable)
             marker = L.marker([lat, lng], {draggable: true}).addTo(map);
             
+            // Set value awal koordinat
             document.getElementById('lat').value = lat;
             document.getElementById('lang').value = lng;
 
-            marker.on('dragend', function(e) {
+            // Update koordinat saat marker berhenti digeser
+            marker.on('dragend', function() {
                 const pos = marker.getLatLng();
                 document.getElementById('lat').value = pos.lat;
                 document.getElementById('lang').value = pos.lng;
             });
         }
 
-        // Ambil lokasi awal user
+        // Ambil Lokasi GPS User
         navigator.geolocation.getCurrentPosition(
-            p => initMap(p.coords.latitude, p.coords.longitude),
-            e => initMap(-6.2000, 106.8166) // Default Jakarta jika GPS mati
+            (p) => initMap(p.coords.latitude, p.coords.longitude),
+            () => initMap(-6.1754, 106.8272) // Default ke Monas jika GPS ditolak
         );
 
+        // Submit Form
         document.getElementById('regForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const btn = document.getElementById('btnSubmit');
-            btn.innerText = "Mengirim..."; btn.disabled = true;
+            btn.innerText = "Memproses..."; btn.disabled = true;
 
             const payload = {
                 nama: document.getElementById('nama').value,
                 email: document.getElementById('email').value,
+                tanggal: document.getElementById('tgl_lahir').value, // Tanggal Lahir
                 whatsapp: document.getElementById('whatsapp').value,
                 lat: document.getElementById('lat').value,
                 lang: document.getElementById('lang').value
             };
 
             fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload) })
-            .then(() => {
-                alert("Berhasil! Silakan cek email Anda untuk aktivasi.");
-                location.reload();
+            .then(res => res.json())
+            .then(res => {
+                alert("Pendaftaran berhasil! Cek email Anda (termasuk folder spam) untuk aktivasi akun.");
+                window.location.href = 'login.html';
             })
-            .catch(() => alert("Terjadi kesalahan."));
+            .catch(err => {
+                alert("Terjadi kesalahan teknis. Coba lagi.");
+                btn.innerText = "Daftar & Kirim Aktivasi";
+                btn.disabled = false;
+            });
         });
     </script>
 </body>
