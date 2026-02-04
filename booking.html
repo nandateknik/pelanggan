@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Service</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>#map { height: 180px; border-radius: 1rem; margin-top: 0.5rem; display: none; }</style>
+</head>
+<body class="bg-gray-100 pb-20">
+    <div class="max-w-md mx-auto min-h-screen flex flex-col">
+        <div class="flex bg-white shadow-sm mb-4">
+            <button onclick="switchTab('new')" class="flex-1 py-4 font-bold text-blue-600 border-b-2 border-blue-600" id="tabNew">Baru</button>
+            <button onclick="switchTab('history')" class="flex-1 py-4 font-bold text-gray-400" id="tabHistory">Riwayat</button>
+        </div>
+
+        <section id="sectionNew" class="p-4 space-y-4">
+            <div class="bg-white p-5 rounded-3xl shadow-sm">
+                <form id="bookingForm" class="space-y-4">
+                    <input type="text" id="pekerjaan" placeholder="Jenis Pekerjaan" class="w-full p-3 bg-gray-50 border rounded-xl" required>
+                    <input type="date" id="tgl_booking" class="w-full p-3 bg-gray-50 border rounded-xl" required>
+                    
+                    <div class="flex items-center justify-between px-2">
+                        <span class="text-sm text-gray-600">Gunakan alamat terdaftar?</span>
+                        <input type="checkbox" id="useDefaultLoc" checked class="w-5 h-5">
+                    </div>
+
+                    <div id="map"></div>
+                    <input type="hidden" id="lat"><input type="hidden" id="lang">
+
+                    <button type="submit" id="btnS" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg">Kirim Pesanan</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="sectionHistory" class="p-4 hidden space-y-4">
+            <input type="date" id="filterDate" onchange="filterHistory()" class="w-full p-3 mb-2 border rounded-xl shadow-sm">
+            <div id="historyList" class="space-y-3"></div>
+            <div id="pagination" class="flex justify-center space-x-2 mt-4"></div>
+        </section>
+    </div>
+
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyLEYvjW8D9ufFyX_mf_6MZ2F6JFESNsbDp2NWOKcAbPOAYn-KX3973P8BmOfSEUncqbg/exec';
+        const user = JSON.parse(localStorage.getItem('userPelanggan'));
+        let allHistory = [];
+        let map, marker;
+
+        // Inisialisasi Lokasi
+        const checkbox = document.getElementById('useDefaultLoc');
+        checkbox.addEventListener('change', (e) => {
+            const mapDiv = document.getElementById('map');
+            if (!e.target.checked) {
+                mapDiv.style.display = 'block';
+                initMap();
+            } else {
+                mapDiv.style.display = 'none';
+                // Reset ke lokasi awal pelanggan (ambil dari data login jika disimpan)
+                document.getElementById('lat').value = user.lat; 
+                document.getElementById('lang').value = user.lang;
+            }
+        });
+
+        function initMap() {
+            if (map) return;
+            navigator.geolocation.getCurrentPosition(p => {
+                const {latitude, longitude} = p.coords;
+                map = L.map('map').setView([latitude, longitude], 15);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                marker = L.marker([latitude, longitude], {draggable: true}).addTo(map);
+                document.getElementById('lat').value = latitude;
+                document.getElementById('lang').value = longitude;
+                marker.on('dragend', () => {
+                    const pos = marker.getLatLng();
+                    document.getElementById('lat').value = pos.lat;
+                    document.getElementById('lang').value = pos.lng;
+                });
+            });
+        }
+
+        function switchTab(t) {
+            document.getElementById('sectionNew').classList.toggle('hidden', t === 'history');
+            document.getElementById('sectionHistory').classList.toggle('hidden', t === 'new');
+            if (t === 'history') loadHistory();
+        }
+
+        function loadHistory() {
+            fetch(scriptURL, { method: 'POST', body: JSON.stringify({action: 'getHistory', email: user.email}) })
+            .then(r => r.json()).then(res => {
+                allHistory = res.data;
+                renderHistory(allHistory);
+            });
+        }
+
+        function renderHistory(data) {
+            const list = document.getElementById('historyList');
+            list.innerHTML = data.map(i => `
+                <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 ${i.status === 'Selesai' ? 'border-green-500' : 'border-orange-400'}">
+                    <div class="flex justify-between font-bold text-gray-800">
+                        <span>${i.pekerjaan}</span>
+                        <span class="text-[10px] bg-gray-100 p-1 rounded uppercase">${i.status}</span>
+                    </div>
+                    <p class="text-xs text-gray-500">${i.tanggal} | ${i.id}</p>
+                </div>
+            `).join('');
+        }
+
+        function filterHistory() {
+            const date = document.getElementById('filterDate').value;
+            const filtered = allHistory.filter(h => h.tanggal.includes(date));
+            renderHistory(filtered);
+        }
+
+        document.getElementById('bookingForm').addEventListener('submit', e => {
+            e.preventDefault();
+            const btn = document.getElementById('btnS');
+            btn.innerText = "Mengirim..."; btn.disabled = true;
+
+            const payload = {
+                action: 'addBooking',
+                email: user.email,
+                nama: user.nama,
+                pekerjaan: document.getElementById('pekerjaan').value,
+                tanggal: document.getElementById('tgl_booking').value,
+                lat: document.getElementById('lat').value,
+                lang: document.getElementById('lang').value
+            };
+
+            fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload) })
+            .then(() => { alert("Booking Berhasil!"); location.reload(); });
+        });
+    </script>
+</body>
+</html>
