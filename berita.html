@@ -145,12 +145,12 @@
 
         function bacaSekarang(idx) {
             const post = window.cachePosts[idx];
-            localStorage.setItem('readingPost', JSON.stringify({
-                title: post.title.$t,
-                content: post.content.$t,
-                date: formatDate(post.published.$t)
-            }));
-            window.location.href = 'baca.html';
+            // Kita ambil "ID" unik beritanya dari URL Blogger
+            const postUrl = post.link.find(l => l.rel === 'alternate').href;
+            const postId = postUrl.split('/').pop().replace('.html', ''); 
+            
+            // Lempar lewat URL parameter saja biar aman
+            window.location.href = `baca.html?id=${postId}`;
         }
 
         window.onload = fetchNews;
