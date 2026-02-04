@@ -144,14 +144,21 @@
         }
 
         function bacaSekarang(idx) {
-            const post = window.cachePosts[idx];
-            // Kita ambil "ID" unik beritanya dari URL Blogger
-            const postUrl = post.link.find(l => l.rel === 'alternate').href;
-            const postId = postUrl.split('/').pop().replace('.html', ''); 
-            
-            // Lempar lewat URL parameter saja biar aman
-            window.location.href = `baca.html?id=${postId}`;
-        }
+    const post = window.cachePosts[idx];
+    
+    // Siapkan data yang mau dikirim
+    const dataToRead = {
+        title: post.title.$t,
+        content: post.content.$t,
+        date: formatDate(post.published.$t)
+    };
+
+    // Simpan di sessionStorage (aman untuk data HTML besar)
+    sessionStorage.setItem('currentRead', JSON.stringify(dataToRead));
+
+    // Pindah ke baca.html
+    window.location.href = 'baca.html';
+}
 
         window.onload = fetchNews;
     </script>
