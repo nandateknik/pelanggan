@@ -18,6 +18,16 @@
         
         /* Animasi halu buat background */
         .blob { position: absolute; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; blur: 40px; }
+
+        /* Tambahin ini di bagian style biar gelembungnya "bernafas" */
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1) translate(0, 0); opacity: 0.5; }
+            50% { transform: scale(1.1) translate(-10px, 10px); opacity: 0.8; }
+        }
+        
+        .blob { 
+            animation: pulse-slow 8s infinite ease-in-out; 
+        }
     </style>
 </head>
 <body class="bg-gray-200">
