@@ -2,63 +2,131 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Booking Service</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <style>#map { height: 180px; border-radius: 1rem; margin-top: 0.5rem; display: none; }</style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .mobile-container { max-width: 480px; min-height: 100vh; margin: 0 auto; background: #f9fafb; position: relative; }
+        #map { height: 200px; border-radius: 1.5rem; margin-top: 1rem; display: none; border: 2px solid #e5e7eb; z-index: 10; }
+        .tab-active { background: #2563eb; color: white; border-radius: 1rem; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        .bottom-nav { max-width: 480px; left: 50%; transform: translateX(-50%); }
+    </style>
 </head>
-<body class="bg-gray-100 pb-20">
-    <div class="max-w-md mx-auto min-h-screen flex flex-col">
-        <div class="flex bg-white shadow-sm mb-4">
-            <button onclick="switchTab('new')" class="flex-1 py-4 font-bold text-blue-600 border-b-2 border-blue-600" id="tabNew">Baru</button>
-            <button onclick="switchTab('history')" class="flex-1 py-4 font-bold text-gray-400" id="tabHistory">Riwayat</button>
+<body class="bg-gray-200">
+
+    <div class="mobile-container shadow-2xl flex flex-col pb-24">
+        
+        <header class="bg-blue-600 pt-10 pb-16 px-6 rounded-b-[3rem] shadow-lg relative overflow-hidden">
+            <div class="relative z-10">
+                <h1 class="text-2xl font-bold text-white">Layanan Pesanan</h1>
+                <p class="text-blue-100 text-sm">Buat work order atau cek riwayat</p>
+            </div>
+            <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full"></div>
+        </header>
+
+        <div class="mx-6 -mt-8 bg-white p-1.5 rounded-2xl shadow-md flex relative z-20 border border-gray-100">
+            <button onclick="switchTab('new')" id="tabNew" class="flex-1 py-3 text-sm font-bold transition-all tab-active">
+                Booking Baru
+            </button>
+            <button onclick="switchTab('history')" id="tabHistory" class="flex-1 py-3 text-sm font-bold text-gray-400 transition-all">
+                Riwayat Saya
+            </button>
         </div>
 
-        <section id="sectionNew" class="p-4 space-y-4">
-            <div class="bg-white p-5 rounded-3xl shadow-sm">
-                <form id="bookingForm" class="space-y-4">
-                    <input type="text" id="pekerjaan" placeholder="Jenis Pekerjaan" class="w-full p-3 bg-gray-50 border rounded-xl" required>
-                    <input type="date" id="tgl_booking" class="w-full p-3 bg-gray-50 border rounded-xl" required>
+        <section id="sectionNew" class="p-6 space-y-5 animate-fadeIn">
+            <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100">
+                <form id="bookingForm" class="space-y-5">
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-400 uppercase ml-2 mb-1 block">Jenis Pekerjaan</label>
+                        <input type="text" id="pekerjaan" placeholder="Misal: Perbaikan AC" 
+                            class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none" required>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-400 uppercase ml-2 mb-1 block">Rencana Tanggal</label>
+                        <input type="date" id="tgl_booking" 
+                            class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none text-gray-600" required>
+                    </div>
                     
-                    <div class="flex items-center justify-between px-2">
-                        <span class="text-sm text-gray-600">Gunakan alamat terdaftar?</span>
-                        <input type="checkbox" id="useDefaultLoc" checked class="w-5 h-5">
+                    <div class="bg-blue-50/50 p-4 rounded-2xl flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-blue-600 p-2 rounded-lg">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            </div>
+                            <span class="text-xs font-semibold text-blue-800">Gunakan Alamat Profil</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="useDefaultLoc" checked class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
                     </div>
 
                     <div id="map"></div>
                     <input type="hidden" id="lat"><input type="hidden" id="lang">
 
-                    <button type="submit" id="btnS" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg">Kirim Pesanan</button>
+                    <button type="submit" id="btnS" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all">
+                        Kirim Work Order
+                    </button>
                 </form>
             </div>
         </section>
 
-        <section id="sectionHistory" class="p-4 hidden space-y-4">
-            <input type="date" id="filterDate" onchange="filterHistory()" class="w-full p-3 mb-2 border rounded-xl shadow-sm">
-            <div id="historyList" class="space-y-3"></div>
-            <div id="pagination" class="flex justify-center space-x-2 mt-4"></div>
+        <section id="sectionHistory" class="p-6 hidden space-y-4">
+            <div class="flex items-center bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
+                <svg class="w-5 h-5 text-gray-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="date" id="filterDate" onchange="filterHistory()" class="w-full p-2 text-sm outline-none bg-transparent text-gray-500">
+            </div>
+            
+            <div id="historyList" class="space-y-4">
+                </div>
         </section>
+
+        <nav class="bottom-nav fixed bottom-6 px-6 w-full z-50">
+            <div class="bg-gray-900/90 backdrop-blur-lg rounded-[2rem] p-4 flex justify-around items-center shadow-2xl border border-white/10">
+                <a href="dashboard.html" class="flex flex-col items-center text-gray-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                </a>
+                <a href="booking.html" class="flex flex-col items-center text-blue-400">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/></svg>
+                </a>
+            </div>
+        </nav>
+
     </div>
 
     <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbyLEYvjW8D9ufFyX_mf_6MZ2F6JFESNsbDp2NWOKcAbPOAYn-KX3973P8BmOfSEUncqbg/exec';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyG_ebSWowNn0bhXvfb5cOaNW47yqotKwBHSBznfGsmnOm-cT-kqljeRW5VmDbVOsCziA/exec';
         const user = JSON.parse(localStorage.getItem('userPelanggan'));
-        let allHistory = [];
-        let map, marker;
+        let map, marker, allHistory = [];
 
-        // Inisialisasi Lokasi
-        const checkbox = document.getElementById('useDefaultLoc');
-        checkbox.addEventListener('change', (e) => {
+        // Proteksi
+        if (!user) window.location.replace('login.html');
+
+        function switchTab(t) {
+            const isNew = t === 'new';
+            document.getElementById('sectionNew').classList.toggle('hidden', !isNew);
+            document.getElementById('sectionHistory').classList.toggle('hidden', isNew);
+            
+            // Tab Style
+            document.getElementById('tabNew').className = `flex-1 py-3 text-sm font-bold transition-all ${isNew ? 'tab-active' : 'text-gray-400'}`;
+            document.getElementById('tabHistory').className = `flex-1 py-3 text-sm font-bold transition-all ${!isNew ? 'tab-active' : 'text-gray-400'}`;
+            
+            if (!isNew) loadHistory();
+        }
+
+        // Lokasi Toggle
+        document.getElementById('useDefaultLoc').addEventListener('change', (e) => {
             const mapDiv = document.getElementById('map');
             if (!e.target.checked) {
                 mapDiv.style.display = 'block';
                 initMap();
             } else {
                 mapDiv.style.display = 'none';
-                // Reset ke lokasi awal pelanggan (ambil dari data login jika disimpan)
-                document.getElementById('lat').value = user.lat; 
+                document.getElementById('lat').value = user.lat;
                 document.getElementById('lang').value = user.lang;
             }
         });
@@ -77,16 +145,13 @@
                     document.getElementById('lat').value = pos.lat;
                     document.getElementById('lang').value = pos.lng;
                 });
-            });
-        }
-
-        function switchTab(t) {
-            document.getElementById('sectionNew').classList.toggle('hidden', t === 'history');
-            document.getElementById('sectionHistory').classList.toggle('hidden', t === 'new');
-            if (t === 'history') loadHistory();
+            }, () => { alert("Gagal mengambil lokasi. Izinkan GPS."); });
         }
 
         function loadHistory() {
+            const list = document.getElementById('historyList');
+            list.innerHTML = `<p class="text-center text-gray-400 py-10">Memuat riwayat...</p>`;
+            
             fetch(scriptURL, { method: 'POST', body: JSON.stringify({action: 'getHistory', email: user.email}) })
             .then(r => r.json()).then(res => {
                 allHistory = res.data;
@@ -96,13 +161,19 @@
 
         function renderHistory(data) {
             const list = document.getElementById('historyList');
+            if (data.length === 0) {
+                list.innerHTML = `<div class="bg-white p-10 rounded-3xl text-center text-gray-400">Belum ada riwayat booking.</div>`;
+                return;
+            }
             list.innerHTML = data.map(i => `
-                <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 ${i.status === 'Selesai' ? 'border-green-500' : 'border-orange-400'}">
-                    <div class="flex justify-between font-bold text-gray-800">
-                        <span>${i.pekerjaan}</span>
-                        <span class="text-[10px] bg-gray-100 p-1 rounded uppercase">${i.status}</span>
+                <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-gray-50 flex items-center justify-between">
+                    <div>
+                        <h4 class="font-bold text-gray-800">${i.pekerjaan}</h4>
+                        <p class="text-[10px] text-gray-400 mt-1">${i.tanggal} | ${i.id}</p>
                     </div>
-                    <p class="text-xs text-gray-500">${i.tanggal} | ${i.id}</p>
+                    <div class="px-3 py-1 rounded-full text-[10px] font-bold ${i.status === 'Selesai' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}">
+                        ${i.status}
+                    </div>
                 </div>
             `).join('');
         }
@@ -116,7 +187,8 @@
         document.getElementById('bookingForm').addEventListener('submit', e => {
             e.preventDefault();
             const btn = document.getElementById('btnS');
-            btn.innerText = "Mengirim..."; btn.disabled = true;
+            btn.innerHTML = `<span class="animate-pulse">Mengirim...</span>`;
+            btn.disabled = true;
 
             const payload = {
                 action: 'addBooking',
@@ -124,12 +196,15 @@
                 nama: user.nama,
                 pekerjaan: document.getElementById('pekerjaan').value,
                 tanggal: document.getElementById('tgl_booking').value,
-                lat: document.getElementById('lat').value,
-                lang: document.getElementById('lang').value
+                lat: document.getElementById('lat').value || user.lat,
+                lang: document.getElementById('lang').value || user.lang
             };
 
             fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload) })
-            .then(() => { alert("Booking Berhasil!"); location.reload(); });
+            .then(() => { 
+                alert("Work Order berhasil dikirim!"); 
+                location.reload(); 
+            });
         });
     </script>
 </body>
