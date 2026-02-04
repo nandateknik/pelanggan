@@ -13,16 +13,18 @@
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         .mobile-container { max-width: 480px; min-height: 100vh; margin: 0 auto; background: #f9fafb; position: relative; }
         .bottom-nav { max-width: 480px; left: 50%; transform: translateX(-50%); }
-        .card-nota { transition: all 0.3s ease; }
+        .card-nota { transition: all 0.3s ease; border-left: 4px solid transparent; }
         .card-nota:active { transform: scale(0.98); }
+        .status-paid { border-left-color: #22c55e; }
+        .status-unpaid { border-left-color: #ef4444; }
     </style>
 </head>
 <body class="bg-gray-200">
 
     <div class="mobile-container shadow-2xl flex flex-col pb-28">
-        <header class="bg-purple-700 pt-10 pb-16 px-6 rounded-b-[3rem] shadow-lg">
+        <header class="bg-blue-600 pt-10 pb-16 px-6 rounded-b-[3rem] shadow-lg">
             <h1 class="text-2xl font-bold text-white">Riwayat Nota</h1>
-            <p class="text-purple-100 text-sm italic">Cek tagihan & download kwitansi</p>
+            <p class="text-blue-100 text-sm italic">Nanda Teknik - Professional Service</p>
         </header>
 
         <div class="mx-6 -mt-8 bg-white p-4 rounded-3xl shadow-md space-y-3 border border-gray-100 relative z-10">
@@ -30,10 +32,10 @@
                 <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 <input type="date" id="filterDate" onchange="filterNota()" class="w-full p-2 bg-transparent text-sm outline-none">
             </div>
-            <select id="filterStatus" onchange="filterNota()" class="w-full p-2 bg-gray-50 border border-gray-100 rounded-xl text-sm outline-none text-gray-600">
+            <select id="filterStatus" onchange="filterNota()" class="w-full p-2 bg-gray-50 border border-gray-100 rounded-xl text-sm outline-none text-gray-600 font-semibold">
                 <option value="ALL">Semua Status</option>
-                <option value="Paid">Lunas (Paid)</option>
-                <option value="Unpaid">Belum Bayar (Unpaid)</option>
+                <option value="Paid">LUNAS (PAID)</option>
+                <option value="Unpaid">BELUM BAYAR (UNPAID)</option>
             </select>
         </div>
 
@@ -42,32 +44,27 @@
 
         <nav class="bottom-nav fixed bottom-6 px-6 w-full z-50">
             <div class="bg-gray-900/95 backdrop-blur-md rounded-[2.5rem] p-4 flex justify-around items-center shadow-2xl">
-                <a href="dashboard.html" class="text-gray-400"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg></a>
-                <a href="booking.html" class="text-gray-400"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg></a>
-                <a href="nota.html" class="text-purple-400"><svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5z"/></svg></a>
+                <a href="dashboard.html" class="text-gray-400 hover:text-white transition-colors"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg></a>
+                <a href="booking.html" class="text-gray-400 hover:text-white transition-colors"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg></a>
+                <a href="nota.html" class="text-blue-400 transition-colors"><svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5z"/></svg></a>
             </div>
         </nav>
     </div>
 
     <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbxKjQEb6t2cpt1hTV1Ts4mZvk5Mr2YulVw5h5s-B7sB6PjyBlH5C1uENxSZGU3Rlc9Fow/exec';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyUOVdkpEZLHF6L8_sm_ESHU1I9Uj4AlrpkNbpqXFOjNqzuwcAeaTQ-dEbjQyuOw5aQWQ/exec';
         const user = JSON.parse(localStorage.getItem('userPelanggan'));
         let allNota = [];
 
         if (!user) window.location.replace('login.html');
 
-        window.onload = () => {
-            loadNota();
-        };
+        window.onload = () => { loadNota(); };
 
         function loadNota() {
             const list = document.getElementById('notaList');
-            list.innerHTML = `<p class="text-center text-gray-400 py-10 animate-pulse">Memuat data nota...</p>`;
+            list.innerHTML = `<div class="flex justify-center p-10"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>`;
             
-            fetch(scriptURL, { 
-                method: 'POST', 
-                body: JSON.stringify({ action: 'getNota', email: user.email }) 
-            })
+            fetch(scriptURL, { method: 'POST', body: JSON.stringify({ action: 'getNota', email: user.email }) })
             .then(r => r.json())
             .then(res => {
                 allNota = res.data;
@@ -77,27 +74,29 @@
 
         function renderNota(data) {
             const list = document.getElementById('notaList');
-            if (data.length === 0) {
-                list.innerHTML = `<div class="bg-white p-10 rounded-[2.5rem] text-center text-gray-400 italic">Data nota tidak ditemukan.</div>`;
+            if (!data || data.length === 0) {
+                list.innerHTML = `<div class="bg-white p-10 rounded-[2.5rem] text-center text-gray-400 italic shadow-sm">Belum ada nota tersedia.</div>`;
                 return;
             }
-            list.innerHTML = data.map(n => `
-                <div class="card-nota bg-white p-5 rounded-[2rem] shadow-sm border border-gray-50 flex items-center justify-between">
+            list.innerHTML = data.map(n => {
+                const isPaid = n.status.toLowerCase() === 'paid';
+                return `
+                <div class="card-nota bg-white p-5 rounded-[2rem] shadow-sm border border-gray-50 flex items-center justify-between ${isPaid ? 'status-paid' : 'status-unpaid'}">
                     <div class="flex items-center space-x-4">
-                        <div class="w-12 h-12 ${n.status.toLowerCase() === 'paid' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'} rounded-2xl flex items-center justify-center">
+                        <div class="w-12 h-12 ${isPaid ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'} rounded-2xl flex items-center justify-center">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                         </div>
                         <div>
                             <h4 class="font-bold text-gray-800 text-sm">${n.id}</h4>
-                            <p class="text-[10px] text-gray-400">${n.tanggal}</p>
+                            <p class="text-[10px] text-gray-400 font-semibold tracking-tighter uppercase">${n.tanggal}</p>
                         </div>
                     </div>
                     <div class="text-right">
                         <p class="text-sm font-bold text-gray-800">Rp ${Number(n.total).toLocaleString('id-ID')}</p>
-                        <button onclick="downloadPDF('${n.id}')" class="text-[9px] mt-1 bg-blue-600 text-white px-3 py-1 rounded-full font-bold">Download PDF</button>
+                        <button onclick="downloadPDF('${n.id}')" class="text-[9px] mt-2 bg-blue-600 text-white px-4 py-1.5 rounded-full font-bold shadow-md shadow-blue-100 hover:bg-blue-700">CETAK PDF</button>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function filterNota() {
@@ -113,14 +112,14 @@
             const nota = allNota.find(n => n.id === notaId);
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-
-            // Watermark Logic
             const isPaid = nota.status.toLowerCase() === 'paid';
-            doc.setTextColor(isPaid ? 200 : 255, isPaid ? 255 : 200, isPaid ? 200 : 200);
-            doc.setFontSize(60);
-            doc.text(isPaid ? 'PAID' : 'UNPAID', 40, 150, { angle: 45, opacity: 0.1 });
 
-            // Header - Logo & Business Info
+            // Watermark (R:200, G:255, B:200 itu untuk hijau muda banget)
+            doc.setTextColor(isPaid ? 220 : 255, isPaid ? 255 : 220, isPaid ? 220 : 220);
+            doc.setFontSize(70);
+            doc.text(isPaid ? 'LUNAS' : 'PENDING', 40, 150, { angle: 45, opacity: 0.1 });
+
+            // Header Info
             doc.setTextColor(0, 0, 0);
             doc.setFontSize(18);
             doc.setFont("helvetica", "bold");
@@ -131,43 +130,54 @@
             doc.text("Sukowidi Indah Residence D05, Klatak, Banyuwangi", 105, 27, { align: "center" });
             doc.text("Telp: 082331201148 | Email: nandateknik02@gmail.com", 105, 32, { align: "center" });
             
-            doc.line(10, 38, 200, 38); // Horizontal Line
+            doc.setDrawColor(0, 0, 0);
+            doc.line(10, 38, 200, 38);
 
             // Nota Info
             doc.setFontSize(10);
-            doc.text(`NO. NOTA : ${nota.id}`, 10, 50);
-            doc.text(`TANGGAL  : ${nota.tanggal}`, 10, 55);
-            doc.text(`PELANGGAN: ${user.nama.toUpperCase()}`, 10, 60);
+            doc.text(`ID NOTA   : ${nota.id}`, 15, 50);
+            doc.text(`TANGGAL   : ${nota.tanggal}`, 15, 56);
+            doc.text(`PELANGGAN : ${user.nama.toUpperCase()}`, 15, 62);
 
-            // Table Items
-            const tableRows = nota.items.map(item => [item.nama, item.qty, `Rp ${Number(item.harga).toLocaleString('id-ID')}`, `Rp ${Number(item.qty * item.harga).toLocaleString('id-ID')}`]);
+            // Parsing Items Aman
+            let itemsArray = [];
+            try {
+                itemsArray = typeof nota.items === 'string' ? JSON.parse(nota.items) : nota.items;
+            } catch (e) { itemsArray = [{nama: "Service Umum", qty: 1, harga: nota.total}]; }
+
+            const tableRows = itemsArray.map(item => [
+                item.nama, 
+                item.qty, 
+                `Rp ${Number(item.harga).toLocaleString('id-ID')}`, 
+                `Rp ${Number(item.qty * item.harga).toLocaleString('id-ID')}`
+            ]);
             
             doc.autoTable({
-                startY: 70,
-                head: [['Nama Pekerjaan / Item', 'Qty', 'Harga', 'Subtotal']],
+                startY: 72,
+                head: [['Deskripsi Layanan', 'Qty', 'Harga', 'Subtotal']],
                 body: tableRows,
-                theme: 'striped',
-                headStyles: { fillStyle: isPaid ? [34, 197, 94] : [239, 68, 68] }
+                headStyles: { fillColor: isPaid ? [34, 197, 94] : [239, 68, 68], textColor: 255 },
+                theme: 'grid'
             });
 
             const finalY = doc.lastAutoTable.finalY + 10;
             doc.setFont("helvetica", "bold");
-            doc.text(`TOTAL PEMBAYARAN: Rp ${Number(nota.total).toLocaleString('id-ID')}`, 140, finalY, { align: "right" });
+            doc.text(`TOTAL TAGIHAN: Rp ${Number(nota.total).toLocaleString('id-ID')}`, 195, finalY, { align: "right" });
 
-            // Footer
-            const footerY = 250;
+            // Footer Section
+            const footerY = 260;
             doc.line(10, footerY - 5, 200, footerY - 5);
             doc.setFontSize(8);
             doc.setFont("helvetica", "normal");
-            doc.text("Pembayaran via Transfer ATM:", 10, footerY);
+            doc.text("Metode Pembayaran (Transfer Bank):", 15, footerY);
             doc.setFont("helvetica", "bold");
-            doc.text("BCA - 1801826011 a/n NANDA KRISBIANTO", 10, footerY + 5);
+            doc.text("BCA - 1801826011 a/n NANDA KRISBIANTO", 15, footerY + 5);
             
             doc.setFont("helvetica", "italic");
             doc.text("Terima kasih telah mempercayakan perbaikan Anda kepada kami.", 105, footerY + 15, { align: "center" });
 
             doc.save(`Nota-${nota.id}.pdf`);
-            Swal.fire('Berhasil', 'Nota sedang diunduh', 'success');
+            Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Nota sedang didownload' });
         }
     </script>
 </body>
