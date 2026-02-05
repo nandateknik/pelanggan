@@ -3,86 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Daftar Akun Pelanggan</title>
+    <title>Daftar - Nanda Teknik</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        #map { height: 220px; border-radius: 1.5rem; margin-bottom: 1rem; z-index: 1; border: 2px solid #f3f4f6; }
+        #map { height: 200px; border-radius: 1.2rem; margin-bottom: 1rem; z-index: 1; border: 2px solid #f3f4f6; }
         .mobile-container { max-width: 480px; min-height: 100vh; margin: 0 auto; background: #f9fafb; }
         input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.5; }
+        .glass-header { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); }
     </style>
 </head>
-<body class="bg-gray-200">
-
-    <script>
-        // PROTEKSI: Jika sudah login, tendang ke dashboard
-        if (localStorage.getItem('userPelanggan')) {
-            window.location.replace('dashboard.html');
-        }
-    </script>
+<body class="bg-gray-100">
 
     <div class="mobile-container shadow-2xl flex flex-col">
-        <header class="p-8 bg-blue-600 text-white rounded-b-[3rem] shadow-lg">
+        <header class="p-8 glass-header text-white rounded-b-[3rem] shadow-lg">
             <h1 class="text-2xl font-bold">Daftar Akun</h1>
-            <p class="text-blue-100 text-sm">Lengkapi data diri dan lokasi Anda.</p>
+            <p class="text-blue-100 text-sm mt-1">Lengkapi data untuk layanan Nanda Teknik</p>
         </header>
 
         <main class="p-6 -mt-10 flex-grow">
-            <div class="bg-white p-6 rounded-[2.5rem] shadow-md">
+            <div class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-50">
                 <form id="regForm" class="space-y-4">
                     <div>
                         <label class="block text-[10px] font-bold text-gray-400 uppercase ml-2 mb-1">Nama Lengkap</label>
                         <input type="text" id="nama" placeholder="Contoh: Budi Santoso" 
-                            class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none" required>
+                            class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" required>
                     </div>
 
                     <div>
                         <label class="block text-[10px] font-bold text-gray-400 uppercase ml-2 mb-1">Email Aktif</label>
                         <input type="email" id="email" placeholder="budi@mail.com" 
-                            class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none" required>
+                            class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" required>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase ml-2 mb-1">Tgl Lahir</label>
+                            <input type="date" id="tgl_lahir" 
+                                class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm" required>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase ml-2 mb-1">WhatsApp</label>
+                            <input type="tel" id="whatsapp" placeholder="0823xxx" 
+                                class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm" required>
+                        </div>
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase ml-2 mb-1">Tanggal Lahir</label>
-                        <input type="date" id="tgl_lahir" 
-                            class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none" required>
-                    </div>
-
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase ml-2 mb-1">Nomor WhatsApp</label>
-                        <input type="tel" id="whatsapp" placeholder="0812xxxx" 
-                            class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none" required>
-                    </div>
-
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase ml-2 mb-2 text-blue-600">Lokasi (Geser Pin Jika Tidak Akurat)</label>
+                        <label class="block text-[10px] font-bold text-blue-600 uppercase ml-2 mb-2">Geser Pin ke Lokasi Rumah Anda</label>
                         <div id="map"></div>
                         <input type="hidden" id="lat">
                         <input type="hidden" id="lang">
                     </div>
 
-                    <button type="submit" id="btnSubmit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-100 hover:bg-blue-700 active:scale-95 transition-all">
+                    <button type="submit" id="btnSubmit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-100 hover:bg-blue-700 active:scale-95 transition-all flex justify-center items-center gap-2">
                         Daftar & Kirim Aktivasi
                     </button>
                 </form>
 
-                <div class="mt-6 text-center">
-                    <p class="text-sm text-gray-500">Sudah punya akun? <a href="login.html" class="text-blue-600 font-bold">Login</a></p>
+                <div class="mt-8 text-center border-t pt-6">
+                    <p class="text-sm text-gray-500">Sudah punya akun? <a href="login.html" class="text-blue-600 font-bold hover:underline">Masuk Sekarang</a></p>
                 </div>
+            </div>
+
+            <div class="mt-6 text-center text-[11px] text-gray-400">
+                Nanda Teknik Banyuwangi<br>
+                Sukowidi Indah Residence, Banyuwangi
             </div>
         </main>
     </div>
 
 <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwHDNeiwfccUdpt2u-g0HX0Pnuj24fEDxfc6xlb2xa-EyycrzUrh9dL3ys6DS33b7Tg3g/exec'; // <-- GANTI DENGAN URL DEPLOY TERBARU
+    // GANTI DENGAN URL WEB APP ANDA
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxSvcECZGidXW0kA7HVCRNJmft2AqaZ0WHKc5FeeUHFzuXOwqwvvr5GxGdGanPYuSggHQ/exec'; 
     let map, marker;
 
-    // 1. Inisialisasi Peta Leaflet
+    // 1. Inisialisasi Peta
     function initMap(lat, lng) {
+        if(map) return;
         map = L.map('map').setView([lat, lng], 16);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        
         marker = L.marker([lat, lng], {draggable: true}).addTo(map);
         
         document.getElementById('lat').value = lat;
@@ -95,24 +97,27 @@
         });
     }
 
-    // 2. Ambil Lokasi GPS User
+    // Ambil GPS
     navigator.geolocation.getCurrentPosition(
         (p) => initMap(p.coords.latitude, p.coords.longitude),
-        () => initMap(-6.1754, 106.8272) // Default Jakarta jika GPS mati
+        () => initMap(-8.197, 114.372) // Default Banyuwangi jika GPS mati
     );
 
-    // 3. PROSES DAFTAR (BAGIAN PALING PENTING)
+    // 2. Proses Submit
     document.getElementById('regForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const btn = document.getElementById('btnSubmit');
-        
-        // Animasi Loading
-        btn.innerText = "Mendaftarkan..."; 
-        btn.disabled = true;
 
-        // Ambil Data dari Form
+        // Modal Loading
+        Swal.fire({
+            title: 'Sedang Mendaftar...',
+            html: 'Mohon tunggu sebentar ya, bre.',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+        });
+
         const payload = {
-            action: 'register', // WAJIB ADA: Biar Google Script tau ini perintah Daftar
+            action: 'register',
             nama: document.getElementById('nama').value,
             email: document.getElementById('email').value,
             tanggal: document.getElementById('tgl_lahir').value,
@@ -121,24 +126,28 @@
             lang: document.getElementById('lang').value
         };
 
-        // Kirim Data ke Google Apps Script
         fetch(scriptURL, { 
             method: 'POST', 
-            mode: 'no-cors', // SOLUSI CORS: Pakai no-cors agar tidak diblokir browser
-            headers: { 'Content-Type': 'text/plain' },
+            mode: 'no-cors',
             body: JSON.stringify(payload) 
         })
         .then(() => {
-            // Karena pakai no-cors, kita nggak bisa baca balasan JSON
-            // Tapi kalau fetch masuk ke .then, artinya data sudah terkirim.
-            alert("PENDAFTARAN BERHASIL!\n\nSilakan cek email Anda (Inbox atau Spam) untuk mengaktifkan akun sebelum login.");
-            window.location.href = 'login.html';
+            Swal.fire({
+                icon: 'success',
+                title: 'Daftar Berhasil!',
+                html: 'Segera cek <b>Inbox</b> atau <b>Spam</b> email Anda untuk aktivasi akun sebelum login.',
+                confirmButtonColor: '#2563eb',
+                confirmButtonText: 'Siap, Mengerti!'
+            }).then(() => {
+                window.location.href = 'login.html';
+            });
         })
         .catch(err => {
-            console.error(err);
-            alert("Waduh, koneksi gagal bre. Coba lagi ya!");
-            btn.innerText = "Daftar & Kirim Aktivasi";
-            btn.disabled = false;
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal Terhubung',
+                text: 'Coba cek koneksi internetmu, bre.'
+            });
         });
     });
 </script>
