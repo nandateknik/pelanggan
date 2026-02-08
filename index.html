@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nanda Teknik - Home</title>
+    <title>Nanda Teknik - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link href='https://raw.githack.com/nandateknik/blogger/main/manifest.json' rel='manifest'/>
@@ -14,213 +14,169 @@
         .blob { position: absolute; border-radius: 50%; filter: blur(60px); z-index: 0; animation: pulse-slow 10s infinite ease-in-out; }
         @keyframes pulse-slow { 0%, 100% { transform: scale(1) translate(0, 0); opacity: 0.4; } 50% { transform: scale(1.2) translate(-20px, 40px); opacity: 0.7; } }
         .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.5); }
-        .btn-primary:active { transform: scale(0.95); transition: 0.2s; }
-        ::-webkit-scrollbar { width: 0px; }
-        .hidden { display: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     </style>
 </head>
 <body class="bg-slate-200">
 
-    <div class="mobile-container shadow-2xl pb-24">
+    <div class="mobile-container shadow-2xl pb-10">
         <div class="blob w-64 h-64 bg-blue-400 -top-20 -right-20"></div>
         <div class="blob w-64 h-64 bg-indigo-300 bottom-1/4 -left-20" style="animation-delay: 2s;"></div>
 
-        <header class="relative pt-16 pb-20 px-8 overflow-hidden rounded-b-[4rem] bg-slate-900 shadow-2xl">
+        <header class="relative pt-12 pb-16 px-8 rounded-b-[3.5rem] bg-slate-900 shadow-2xl overflow-hidden">
             <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;"></div>
-            <div class="relative z-10 text-center">
-                <div class="inline-block px-4 py-1.5 bg-blue-500/20 rounded-full mb-4 border border-blue-500/30">
-                    <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em]">Maintenance Specialist</p>
-                </div>
-                <h1 class="text-4xl font-extrabold text-white tracking-tighter mb-2">NANDA <span class="text-blue-500">TEKNIK</span></h1>
-                <p class="text-slate-400 text-sm font-medium">Solusi teknik profesional banyuwangi.</p>
+            <div class="relative z-10">
+                <p class="text-blue-400 text-[10px] font-black uppercase tracking-[0.3em] mb-1">Status Bengkel</p>
+                <h1 class="text-3xl font-extrabold text-white tracking-tighter">DASHBOARD <span class="text-blue-500">UTAMA</span></h1>
+                <div id="liveTime" class="text-slate-400 text-[11px] font-medium mt-1">Memuat waktu...</div>
             </div>
         </header>
 
-        <div class="px-6 -mt-10 relative z-20 grid grid-cols-2 gap-4">
-            <div class="glass-card p-6 rounded-[2.5rem] shadow-xl text-center">
-                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Hari Ini Selesai</p>
-                <div class="flex items-center justify-center space-x-1">
-                    <span id="statsSelesai" class="text-3xl font-black text-slate-800">0</span>
-                    <span class="text-green-500 text-lg">✓</span>
-                </div>
-            </div>
-            <div class="glass-card p-6 rounded-[2.5rem] shadow-xl text-center">
-                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Dalam Proses</p>
-                <div class="flex items-center justify-center space-x-1">
-                    <span id="statsProses" class="text-3xl font-black text-slate-800">0</span>
-                    <span class="animate-pulse text-orange-500 text-lg">●</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="px-8 mt-10 space-y-4 relative z-10">
-            <a href="login.html" class="btn-primary block w-full bg-blue-600 hover:bg-blue-700 text-white p-5 rounded-3xl text-center shadow-lg shadow-blue-500/30 transition-all">
-                <span class="font-black text-sm uppercase tracking-widest">Masuk ke Dashboard</span>
-            </a>
-            <div class="grid grid-cols-2 gap-3">
-                <a href="https://wa.me/6282331201148" class="btn-primary bg-white border border-slate-100 p-4 rounded-3xl flex items-center justify-center space-x-2 shadow-sm">
-                    <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" class="w-4 h-4">
-                    <span class="text-[11px] font-black text-slate-700">WhatsApp</span>
-                </a>
-                <a href="tel:082331201148" class="btn-primary bg-white border border-slate-100 p-4 rounded-3xl flex items-center justify-center space-x-2 shadow-sm">
-                    <svg class="w-4 h-4 text-slate-700" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
-                    <span class="text-[11px] font-black text-slate-700">Telepon</span>
-                </a>
-            </div>
-        </div>
-
-        <div class="px-8 mt-10 relative z-10">
-            <div class="glass-card rounded-[2.5rem] p-6 shadow-xl border border-blue-50">
+        <div class="px-6 -mt-8 relative z-20">
+            <div class="glass-card p-6 rounded-[2.5rem] shadow-xl border border-white">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-black text-slate-800 text-[12px] uppercase tracking-widest">Jadwal Kerja</h3>
-                    <div class="flex space-x-2">
-                        <button onclick="prevMonth()" class="p-1 text-slate-400 hover:text-blue-600">◀</button>
-                        <span id="calendarMonth" class="text-[10px] font-black text-blue-600 uppercase tracking-tighter">Mei 2026</span>
-                        <button onclick="nextMonth()" class="p-1 text-slate-400 hover:text-blue-600">▶</button>
+                    <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest">Informasi Antrean</h3>
+                    <span class="px-3 py-1 bg-green-100 text-green-600 rounded-full text-[9px] font-bold animate-pulse">LIVE</span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-blue-50 p-4 rounded-3xl border border-blue-100">
+                        <p class="text-[9px] font-bold text-blue-400 uppercase mb-1">No. Antrean Saat Ini</p>
+                        <p id="currentQueue" class="text-3xl font-black text-blue-700">--</p>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-3xl border border-slate-100">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">Sisa Antrean</p>
+                        <p id="remainingQueue" class="text-3xl font-black text-slate-700">--</p>
                     </div>
                 </div>
-                <div class="grid grid-cols-7 gap-1 text-center mb-2">
-                    <div class="text-[8px] font-bold text-slate-400 uppercase">Min</div>
-                    <div class="text-[8px] font-bold text-slate-400 uppercase">Sen</div>
-                    <div class="text-[8px] font-bold text-slate-400 uppercase">Sel</div>
-                    <div class="text-[8px] font-bold text-slate-400 uppercase">Rab</div>
-                    <div class="text-[8px] font-bold text-slate-400 uppercase">Kam</div>
-                    <div class="text-[8px] font-bold text-slate-400 uppercase">Jum</div>
-                    <div class="text-[8px] font-bold text-slate-400 uppercase">Sab</div>
-                </div>
-                <div id="calendarDays" class="grid grid-cols-7 gap-1"></div>
-            </div>
-        </div>
 
-        <div class="px-8 mt-10 relative z-10">
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center space-x-2">
-                    <span class="relative flex h-3 w-3">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                    </span>
-                    <h3 class="font-black text-slate-800 text-[12px] uppercase tracking-widest">Aktivitas Hari Ini</h3>
-                </div>
-                <p id="liveDate" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">-- --- ----</p>
-            </div>
-            <div id="liveFeed" class="space-y-4">
-                <div class="animate-pulse bg-slate-50 p-4 rounded-[2rem] border border-dashed border-slate-200">
+                <div class="mt-4 pt-4 border-t border-dashed border-slate-200">
                     <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-slate-200 rounded-2xl"></div>
-                        <div class="space-y-2 flex-1"><div class="h-2 w-1/3 bg-slate-200 rounded"></div><div class="h-2 w-1/2 bg-slate-200 rounded"></div></div>
+                        <div class="flex-1">
+                            <p class="text-[10px] font-bold text-slate-500 mb-1">Pekerjaan Berjalan:</p>
+                            <p id="activeJob" class="text-[12px] font-black text-slate-800 italic">"Mengecek data bengkel..."</p>
+                        </div>
+                        <div class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                            <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <footer class="mt-16 text-center px-8 pb-10">
+        <div class="mt-10 px-8">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest">Berita & Tips Teknik</h3>
+                <a href="https://www.nandateknik.com" class="text-[10px] font-bold text-blue-600 uppercase">Lihat Blog</a>
+            </div>
+            
+            <div id="blogFeed" class="flex space-x-4 overflow-x-auto no-scrollbar pb-4">
+                <div class="min-w-[240px] bg-white p-4 rounded-[2rem] border border-slate-100 shadow-sm animate-pulse">
+                    <div class="w-full h-32 bg-slate-100 rounded-[1.5rem] mb-3"></div>
+                    <div class="h-3 w-3/4 bg-slate-100 rounded mb-2"></div>
+                    <div class="h-3 w-1/2 bg-slate-100 rounded"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 px-8 relative z-10">
+            <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest mb-4">Urutan Pengerjaan</h3>
+            <div id="queueList" class="space-y-3">
+                </div>
+        </div>
+
+        <footer class="mt-12 text-center pb-10">
             <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.3em]">© 2026 NANDA TEKNIK BANYUWANGI</p>
         </footer>
-
-        <div id="installPrompt" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] z-[100]">
-            <div class="bg-slate-900 text-white p-5 rounded-[2.5rem] shadow-2xl flex items-center justify-between border border-slate-700">
-                <div class="flex items-center space-x-3 text-left">
-                    <div class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg">🛠️</div>
-                    <div>
-                        <p class="text-[10px] font-black uppercase text-blue-400">Instal Aplikasi</p>
-                        <p class="text-[9px] text-slate-400 font-medium">Lebih ringan & cepat</p>
-                    </div>
-                </div>
-                <button id="btnInstall" class="bg-blue-600 text-white px-5 py-2 rounded-2xl text-[10px] font-black uppercase">Instal</button>
-            </div>
-        </div>
     </div>
 
     <script>
+        // Gunakan RSS to JSON untuk mengambil data blogspot
+        const blogRSS = "https://www.nandateknik.com/feeds/posts/default?alt=rss";
+        const rssConverter = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(blogRSS)}`;
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxY4VcR8IEpoLiNvvXEEIAphD6Z4Y2BkAQS2GMLE-NPuZu6DMFwDFRPTVBX-M_KosKBTA/exec';
 
-        // --- 1. LOGIKA WAKTU & DATA ---
-        function updateTime() {
-            const options = { day: 'numeric', month: 'short', year: 'numeric' };
-            document.getElementById('liveDate').innerText = new Date().toLocaleDateString('id-ID', options);
+        // 1. Ambil Data Blog
+        async function fetchBlog() {
+            try {
+                const response = await fetch(rssConverter);
+                const data = await response.json();
+                const feedContainer = document.getElementById('blogFeed');
+                
+                if (data.status === 'ok') {
+                    feedContainer.innerHTML = data.items.slice(0, 5).map(post => `
+                        <a href="${post.link}" class="min-w-[260px] max-w-[260px] bg-white p-4 rounded-[2rem] border border-slate-100 shadow-md transition-transform active:scale-95">
+                            <img src="${post.thumbnail || 'https://via.placeholder.com/300x180?text=Nanda+Teknik'}" class="w-full h-32 object-cover rounded-[1.5rem] mb-3">
+                            <h4 class="text-[12px] font-black text-slate-800 line-clamp-2 leading-tight uppercase">${post.title}</h4>
+                            <p class="text-[10px] text-slate-400 mt-2 font-bold">${new Date(post.pubDate).toLocaleDateString('id-ID')}</p>
+                        </a>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error("Gagal memuat blog", err);
+            }
         }
 
-        async function fetchLiveWorkload() {
+        // 2. Ambil Data Pekerjaan & Antrean
+        async function fetchJobs() {
             try {
                 const response = await fetch(scriptURL, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'getLiveWorkload' })
                 });
                 const res = await response.json();
+
                 if (res.status === 'success') {
-                    document.getElementById('statsSelesai').innerText = res.stats.selesai;
-                    document.getElementById('statsProses').innerText = res.stats.proses;
-                    const feed = document.getElementById('liveFeed');
-                    if (!res.data || res.data.length === 0) {
-                        feed.innerHTML = `<div class="text-center py-8 bg-slate-50 rounded-[2rem] border border-dashed border-slate-200"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Belum ada antrean hari ini</p></div>`;
-                        return;
-                    }
-                    feed.innerHTML = res.data.map(item => {
-                        const isSelesai = item.status.toLowerCase().includes('selesai');
-                        return `<div class="bg-white p-4 rounded-[2rem] border border-slate-100 flex items-center justify-between shadow-sm">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-11 h-11 ${isSelesai ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'} rounded-2xl flex items-center justify-center"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-                                <div><p class="text-[11px] font-black text-slate-800 tracking-tight">${item.nama}</p><p class="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">${item.pekerjaan}</p></div>
+                    const jobs = res.data;
+                    const ongoing = jobs.filter(j => j.status.toLowerCase().includes('proses'));
+                    const waiting = jobs.filter(j => j.status.toLowerCase().includes('antri') || j.status.toLowerCase().includes('pending'));
+                    
+                    // Update Stats Atas
+                    document.getElementById('currentQueue').innerText = ongoing.length > 0 ? jobs.indexOf(ongoing[0]) + 1 : "0";
+                    document.getElementById('remainingQueue').innerText = waiting.length;
+                    document.getElementById('activeJob').innerText = ongoing.length > 0 ? ongoing[0].pekerjaan : "Tidak ada pekerjaan aktif";
+
+                    // Update List Urutan
+                    const queueList = document.getElementById('queueList');
+                    queueList.innerHTML = jobs.slice(0, 10).map((item, index) => {
+                        const isDone = item.status.toLowerCase().includes('selesai');
+                        const isProses = item.status.toLowerCase().includes('proses');
+                        
+                        return `
+                        <div class="flex items-center p-4 bg-white rounded-3xl border ${isProses ? 'border-blue-500 ring-4 ring-blue-50' : 'border-slate-100'} shadow-sm">
+                            <div class="text-[14px] font-black text-slate-300 w-8">#${index + 1}</div>
+                            <div class="flex-1">
+                                <p class="text-[11px] font-black text-slate-800">${item.nama}</p>
+                                <p class="text-[9px] text-slate-400 font-bold uppercase">${item.pekerjaan}</p>
                             </div>
-                            <span class="px-3 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-widest ${isSelesai ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}">${item.status}</span>
-                        </div>`;
+                            <span class="text-[8px] font-black px-3 py-1.5 rounded-xl uppercase tracking-tighter 
+                                ${isDone ? 'bg-green-100 text-green-600' : isProses ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}">
+                                ${item.status}
+                            </span>
+                        </div>
+                        `;
                     }).join('');
                 }
-            } catch (err) { console.error("Gagal ambil data:", err); }
-        }
-
-        // --- 2. LOGIKA KALENDER ---
-        let currDate = new Date();
-        function renderCalendar() {
-            const mYear = document.getElementById('calendarMonth');
-            const dElem = document.getElementById('calendarDays');
-            const year = currDate.getFullYear();
-            const month = currDate.getMonth();
-            const firstDay = new Date(year, month, 1).getDay();
-            const lastDate = new Date(year, month + 1, 0).getDate();
-            const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-            
-            mYear.innerText = `${months[month]} ${year}`;
-            dElem.innerHTML = '';
-            for (let i = 0; i < firstDay; i++) { dElem.innerHTML += `<div class="h-8"></div>`; }
-            for (let d = 1; d <= lastDate; d++) {
-                const isToday = d === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
-                dElem.innerHTML += `<div class="h-10 flex flex-col items-center justify-center rounded-xl text-[10px] font-bold ${isToday ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-slate-600 hover:bg-slate-50'}">${d}</div>`;
+            } catch (err) {
+                console.error("Gagal memuat antrean", err);
             }
         }
-        function prevMonth() { currDate.setMonth(currDate.getMonth() - 1); renderCalendar(); }
-        function nextMonth() { currDate.setMonth(currDate.getMonth() + 1); renderCalendar(); }
 
-        // --- 3. LOGIKA PWA & INSTALL PROMPT ---
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('installPrompt').classList.remove('hidden');
-        });
-
-        document.getElementById('btnInstall').addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                deferredPrompt = null;
-                document.getElementById('installPrompt').classList.add('hidden');
-            }
-        });
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('SW Registered'))
-                    .catch(err => console.log('SW Error', err));
-            });
+        function updateLiveTime() {
+            const now = new Date();
+            const options = { weekday: 'long', day: 'numeric', month: 'long' };
+            document.getElementById('liveTime').innerText = now.toLocaleDateString('id-ID', options) + " • " + now.toLocaleTimeString('id-ID');
         }
 
-        // Inisialisasi
-        updateTime();
-        fetchLiveWorkload();
-        renderCalendar();
-        setInterval(fetchLiveWorkload, 60000);
+        // Jalankan
+        updateLiveTime();
+        setInterval(updateLiveTime, 1000);
+        fetchBlog();
+        fetchJobs();
+        
+        // Refresh otomatis data tiap 2 menit
+        setInterval(fetchJobs, 120000);
     </script>
 </body>
 </html>
