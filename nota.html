@@ -13,40 +13,23 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F8FAFC; color: #1E293B; }
         .mobile-container { max-width: 480px; min-height: 100vh; margin: 0 auto; background: #ffffff; position: relative; overflow: hidden; }
-        
         .card-gradient { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); }
         .glass-icon { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(8px); }
-        
         .blob { position: absolute; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; animation: pulse-slow 8s infinite ease-in-out; }
-        @keyframes pulse-slow {
-            0%, 100% { transform: scale(1) translate(0, 0); opacity: 0.5; }
-            50% { transform: scale(1.1) translate(-10px, 10px); opacity: 0.8; }
-        }
-
+        @keyframes pulse-slow { 0%, 100% { transform: scale(1) translate(0, 0); opacity: 0.5; } 50% { transform: scale(1.1) translate(-10px, 10px); opacity: 0.8; } }
         .glass-filter { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.5); }
         .card-nota { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid #F1F5F9; }
         .card-nota:active { transform: scale(0.96); background: #F8FAFC; }
-        
         .receipt-paper { background: white; position: relative; filter: drop-shadow(0 20px 25px rgba(0,0,0,0.15)); }
-        .receipt-paper::after {
-            content: ""; position: absolute; bottom: -10px; left: 0; right: 0; height: 10px;
-            background-image: linear-gradient(135deg, white 5px, transparent 0), linear-gradient(-135deg, white 5px, transparent 0);
-            background-size: 10px 10px;
-        }
+        .receipt-paper::after { content: ""; position: absolute; bottom: -10px; left: 0; right: 0; height: 10px; background-size: 10px 10px; background-image: linear-gradient(135deg, white 5px, transparent 0), linear-gradient(-135deg, white 5px, transparent 0); }
         .modal-animate { animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
         .bottom-nav { max-width: 480px; left: 50%; transform: translateX(-50%); }
-        ::-webkit-scrollbar { width: 0px; }
-
-        /* Style Khusus Print (Hidden from screen) */
-        #notaPrintArea { font-family: 'Courier New', Courier, monospace; }
     </style>
 </head>
 <body class="bg-slate-200">
 
     <div class="mobile-container shadow-2xl flex flex-col pb-32">
-        
         <header class="card-gradient pt-14 pb-24 px-8 rounded-b-[3.5rem] shadow-2xl relative overflow-hidden">
             <div class="relative z-10 flex justify-between items-center">
                 <div>
@@ -58,7 +41,6 @@
                 </a>
             </div>
             <div class="blob -right-10 -bottom-10"></div>
-            <div class="blob -left-20 -top-20 opacity-50"></div>
         </header>
 
         <div class="mx-6 -mt-10 relative z-20 glass-filter p-5 rounded-[2.5rem] shadow-xl border border-white/50 space-y-3">
@@ -76,18 +58,14 @@
             </div>
         </div>
 
-        <main id="notaList" class="p-6 space-y-5 relative z-10 flex-grow">
-            <div class="flex flex-col items-center justify-center p-20 space-y-4">
-                <div class="animate-spin rounded-full h-10 w-10 border-4 border-blue-600 border-t-transparent"></div>
-            </div>
-        </main>
+        <main id="notaList" class="p-6 space-y-5 relative z-10 flex-grow"></main>
 
-        <div id="pagination" class="flex justify-between items-center px-10 py-4 hidden relative z-10">
-            <button onclick="changePage(-1)" id="prevBtn" class="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 active:scale-90 transition-all disabled:opacity-30">
+        <div id="pagination" class="flex justify-between items-center px-10 py-4 hidden">
+            <button onclick="changePage(-1)" id="prevBtn" class="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 active:scale-90 disabled:opacity-30">
                 <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             </button>
-            <span id="pageLabel" class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Hal 1</span>
-            <button onclick="changePage(1)" id="nextBtn" class="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 active:scale-90 transition-all disabled:opacity-30">
+            <span id="pageLabel" class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Hal 1</span>
+            <button onclick="changePage(1)" id="nextBtn" class="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 active:scale-90 disabled:opacity-30">
                 <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
             </button>
         </div>
@@ -98,18 +76,18 @@
                 <div class="w-full max-w-[440px]">
                     <div class="receipt-paper rounded-t-[2.5rem] overflow-hidden p-8 pb-12">
                         <div class="text-center mb-6 border-b border-dashed border-slate-200 pb-6">
-                            <h2 class="text-xl font-black text-slate-800">NANDA TEKNIK</h2>
-                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-1">Digital Receipt</p>
+                            <h2 class="text-xl font-black text-slate-800 uppercase">Nanda Teknik</h2>
+                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Digital Receipt</p>
                         </div>
-                        <div class="space-y-3 mb-6">
-                            <div class="flex justify-between text-[10px] uppercase font-bold"><span class="text-slate-400">Invoice</span><span id="modalId" class="text-slate-800"></span></div>
-                            <div class="flex justify-between text-[10px] uppercase font-bold"><span class="text-slate-400">Tanggal</span><span id="modalTgl" class="text-slate-800"></span></div>
+                        <div class="space-y-3 mb-6" id="modalContent">
+                            <div class="flex justify-between text-[10px] uppercase font-bold"><span class="text-slate-400">Invoice</span><span id="modalId"></span></div>
+                            <div class="flex justify-between text-[10px] uppercase font-bold"><span class="text-slate-400">Tanggal</span><span id="modalTgl"></span></div>
                             <div class="flex justify-between text-[10px] uppercase font-bold"><span class="text-slate-400">Status</span><span id="modalStatus"></span></div>
                         </div>
                         <div id="modalItems" class="space-y-4 mb-8 border-y border-slate-50 py-6"></div>
                         <div class="flex justify-between items-center mb-10">
-                            <span class="text-xs font-black uppercase tracking-widest text-slate-400">Total Akhir</span>
-                            <span id="modalTotal" class="text-2xl font-black text-blue-600 tracking-tighter"></span>
+                            <span class="text-xs font-black uppercase text-slate-400">Total Akhir</span>
+                            <span id="modalTotal" class="text-2xl font-black text-blue-600"></span>
                         </div>
                         <div class="grid grid-cols-2 gap-3">
                             <button onclick="closeNota()" class="bg-slate-100 text-slate-500 p-5 rounded-[1.5rem] text-[10px] font-black uppercase">Tutup</button>
@@ -122,68 +100,62 @@
 
         <nav class="bottom-nav fixed bottom-6 px-6 w-full z-50">
             <div class="bg-slate-900/95 backdrop-blur-xl rounded-[2.5rem] p-4 flex justify-around items-center shadow-2xl border border-white/10">
-                <a href="dashboard.html" class="p-2 text-slate-500 hover:text-white transition-all">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                </a>
-                <a href="booking.html" class="p-2 text-slate-500 hover:text-white transition-all">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
-                </a>
-                <a href="nota.html" class="p-4 bg-blue-600 rounded-3xl text-white shadow-lg shadow-blue-500/40 -mt-12 border-4 border-[#F8FAFC]">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                </a>
+                <a href="dashboard.html" class="p-2 text-slate-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg></a>
+                <a href="booking.html" class="p-2 text-slate-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg></a>
+                <a href="nota.html" class="p-4 bg-blue-600 rounded-3xl text-white -mt-12 border-4 border-[#F8FAFC]"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></a>
             </div>
         </nav>
     </div>
 
-    <div id="notaPrintArea" class="hidden" style="width: 790px; padding: 40px; background: white; color: black; position: relative;">
-        <div id="pdf-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 80px; font-weight: bold; opacity: 0.1; border: 10px solid; padding: 20px; border-radius: 20px; z-index: 0;"></div>
+    <div id="notaPrintArea" class="hidden" style="width: 794px; min-height: 1123px; padding: 50px; background: white; color: black; position: relative; font-family: 'Courier New', Courier, monospace;">
+        <div id="pdf-watermark" style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%) rotate(-35deg); font-size: 150px; font-weight: 900; opacity: 0.08; border: 15px solid; padding: 30px; border-radius: 30px; pointer-events: none; z-index: 0; text-transform: uppercase;"></div>
         
         <div style="position: relative; z-index: 1;">
-            <div style="text-align: center; border-bottom: 2px solid black; padding-bottom: 20px; margin-bottom: 30px;">
-                <h1 style="font-size: 28px; font-weight: 800; margin: 0;">NANDA TEKNIK BANYUWANGI</h1>
-                <p style="font-size: 12px; margin: 5px 0;">Network, Software & Electrical Engineering</p>
-                <p style="font-size: 11px; margin: 0;">Sukowidi Indah Residence, Blok D-5 Banyuwangi | Wa: 082331201148</p>
+            <div style="text-align: center; border-bottom: 3px double black; padding-bottom: 15px; margin-bottom: 25px;">
+                <h1 style="font-size: 32px; font-weight: bold; margin: 0; letter-spacing: 2px;">NANDA TEKNIK BANYUWANGI</h1>
+                <p style="font-size: 14px; margin: 5px 0;">Network, Software & Electrical Engineering</p>
+                <p style="font-size: 13px; margin: 0;">Sukowidi Indah Residence, Blok D-5 Banyuwangi | WhatsApp: 0823-3120-1148</p>
             </div>
 
-            <div style="display: flex; justify-content: space-between; margin-bottom: 30px; font-size: 13px;">
-                <div>
-                    <p><strong>INVOICE:</strong> <span id="pdf-id"></span></p>
-                    <p><strong>KEPADA:</strong> <span id="pdf-nama"></span></p>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 30px; font-size: 15px; line-height: 1.6;">
+                <div style="flex: 1;">
+                    <p><strong>INVOICE :</strong> <span id="pdf-id"></span></p>
+                    <p><strong>KEPADA  :</strong> <span id="pdf-nama"></span></p>
                 </div>
-                <div style="text-align: right;">
-                    <p><strong>TANGGAL:</strong> <span id="pdf-tgl"></span></p>
-                    <p><strong>STATUS:</strong> <span id="pdf-status" style="font-weight: 800; text-transform: uppercase;"></span></p>
+                <div style="flex: 1; text-align: right;">
+                    <p><strong>TANGGAL :</strong> <span id="pdf-tgl"></span></p>
+                    <p><strong>STATUS  :</strong> <span id="pdf-status" style="font-weight: 900; text-transform: uppercase; padding: 2px 8px; border: 1px solid;"></span></p>
                 </div>
             </div>
 
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px; font-size: 13px;">
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14px; border: 1px solid black;">
                 <thead>
-                    <tr style="background: #f1f5f9; border-bottom: 2px solid black;">
-                        <th style="padding: 12px; text-align: left;">DESKRIPSI LAYANAN / BARANG</th>
-                        <th style="padding: 12px; text-align: center;">QTY</th>
-                        <th style="padding: 12px; text-align: right;">HARGA</th>
-                        <th style="padding: 12px; text-align: right;">SUBTOTAL</th>
+                    <tr style="background: #eee; border-bottom: 2px solid black;">
+                        <th style="padding: 12px; text-align: left; border-right: 1px solid black;">DESKRIPSI LAYANAN / BARANG</th>
+                        <th style="padding: 12px; text-align: center; border-right: 1px solid black; width: 60px;">QTY</th>
+                        <th style="padding: 12px; text-align: right; border-right: 1px solid black; width: 120px;">HARGA</th>
+                        <th style="padding: 12px; text-align: right; width: 120px;">SUBTOTAL</th>
                     </tr>
                 </thead>
                 <tbody id="pdf-items"></tbody>
                 <tfoot>
-                    <tr style="border-top: 2px solid black; font-weight: 800; font-size: 16px;">
-                        <td colspan="3" style="padding: 15px; text-align: right;">TOTAL AKHIR:</td>
-                        <td id="pdf-total" style="padding: 15px; text-align: right; color: #2563eb;"></td>
+                    <tr style="border-top: 2px solid black; background: #fafafa;">
+                        <td colspan="3" style="padding: 15px; text-align: right; font-weight: bold; font-size: 16px;">TOTAL AKHIR :</td>
+                        <td id="pdf-total" style="padding: 15px; text-align: right; font-weight: 900; font-size: 18px;"></td>
                     </tr>
                 </tfoot>
             </table>
 
-            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 50px;">
-                <div style="border: 1px dashed #ccc; padding: 10px; border-radius: 8px; width: 250px;">
-                    <p style="font-weight: bold; margin-bottom: 5px; text-decoration: underline;">INFO PEMBAYARAN:</p>
+            <div style="display: flex; justify-content: space-between; margin-top: 60px; font-size: 13px;">
+                <div style="flex: 1.5; border: 1px dashed black; padding: 15px; border-radius: 5px;">
+                    <p style="font-weight: bold; text-decoration: underline; margin-bottom: 8px;">METODE PEMBAYARAN:</p>
                     <p>Bank BCA - Nanda Krisbianto</p>
-                    <p>No. Rek: 1801826011</p>
-                    <p style="margin-top: 5px; font-style: italic;">*Simpan bukti bayar ini sebagai garansi resmi.</p>
+                    <p>No. Rekening: <strong>180-182-6011</strong></p>
+                    <p style="margin-top: 10px; font-style: italic; color: #444;">* Harap simpan nota digital ini sebagai bukti klaim garansi yang sah.</p>
                 </div>
-                <div style="text-align: center; width: 200px;">
-                    <p style="margin-bottom: 60px; font-weight: bold;">Hormat Kami,</p>
-                    <p style="font-weight: bold;">( NANDA KRISBIANTO )</p>
+                <div style="flex: 1; text-align: center;">
+                    <p style="margin-bottom: 80px; font-weight: bold;">Hormat Kami,</p>
+                    <p style="font-weight: bold; text-decoration: underline;">( NANDA KRISBIANTO )</p>
                     <p>Owner Nanda Teknik</p>
                 </div>
             </div>
@@ -197,29 +169,32 @@
 
         if (!user) window.location.replace('login.html');
 
-        window.onload = () => { loadNota(); };
+        window.onload = loadNota;
 
         function loadNota() {
+            document.getElementById('notaList').innerHTML = `<div class="flex justify-center p-20"><div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div></div>`;
             fetch(scriptURL, { method: 'POST', body: JSON.stringify({ action: 'getNota', email: user.email }) })
             .then(r => r.json())
-            .then(res => {
-                allNota = res.data || [];
-                filteredNota = allNota;
-                renderNota();
-            })
-            .catch(err => {
-                document.getElementById('notaList').innerHTML = `<p class="text-center py-10 text-xs font-bold text-red-400">Gagal memuat data nota.</p>`;
-            });
+            .then(res => { allNota = res.data || []; filteredNota = allNota; renderNota(); })
+            .catch(() => { document.getElementById('notaList').innerHTML = `<p class="text-center py-10 text-red-500">Gagal memuat data.</p>`; });
+        }
+
+        // Formatter Tanggal agar tidak muncul format ISO (2026-02-06T17:00...)
+        function formatDate(dateStr) {
+            try {
+                const date = new Date(dateStr);
+                if(isNaN(date)) return dateStr;
+                return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+            } catch(e) { return dateStr; }
         }
 
         function renderNota() {
             const list = document.getElementById('notaList');
             const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const paginatedData = filteredNota.slice(start, end);
+            const paginated = filteredNota.slice(start, start + itemsPerPage);
 
-            if (paginatedData.length === 0) {
-                list.innerHTML = `<div class="bg-white p-12 rounded-[3rem] text-center border border-dashed border-slate-200 mt-10 text-[10px] font-black text-slate-400 uppercase tracking-widest">Tidak ada nota</div>`;
+            if (paginated.length === 0) {
+                list.innerHTML = `<div class="bg-white p-12 rounded-[3rem] text-center border-dashed border-2 border-slate-100 mt-10 text-slate-400">Tidak ada nota</div>`;
                 document.getElementById('pagination').classList.add('hidden');
                 return;
             }
@@ -227,27 +202,27 @@
             document.getElementById('pagination').classList.remove('hidden');
             document.getElementById('pageLabel').innerText = `Hal ${currentPage}`;
             document.getElementById('prevBtn').disabled = currentPage === 1;
-            document.getElementById('nextBtn').disabled = end >= filteredNota.length;
+            document.getElementById('nextBtn').disabled = (start + itemsPerPage) >= filteredNota.length;
 
-            list.innerHTML = paginatedData.map(n => {
+            list.innerHTML = paginated.map(n => {
                 const isPaid = n.status.toLowerCase() === 'paid' || n.status.toLowerCase() === 'lunas';
                 return `
                 <div onclick="openNota('${n.id}')" class="card-nota bg-white p-6 rounded-[2.5rem] shadow-sm flex flex-col space-y-4 cursor-pointer">
-                    <div class="flex items-center justify-between">
+                    <div class="flex justify-between items-center">
                         <div class="flex items-center space-x-4">
                             <div class="w-12 h-12 ${isPaid ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'} rounded-2xl flex items-center justify-center">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                             </div>
                             <div>
-                                <h4 class="font-extrabold text-slate-800 text-[13px] tracking-tight">${n.id}</h4>
-                                <p class="text-[9px] text-slate-400 font-black uppercase tracking-widest">${n.tanggal}</p>
+                                <h4 class="font-bold text-slate-800">${n.id}</h4>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase">${formatDate(n.tanggal)}</p>
                             </div>
                         </div>
-                        <span class="px-3 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-widest ${isPaid ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">${n.status}</span>
+                        <span class="px-3 py-1.5 rounded-xl text-[8px] font-black uppercase ${isPaid ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">${n.status}</span>
                     </div>
-                    <div class="flex items-center justify-between pt-4 border-t border-slate-50">
-                        <div><p class="text-[8px] text-slate-400 font-black uppercase tracking-widest">Total</p><p class="text-base font-black text-slate-900">Rp ${Number(n.total).toLocaleString('id-ID')}</p></div>
-                        <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div>
+                    <div class="flex justify-between items-center pt-4 border-t border-slate-50">
+                        <p class="text-base font-black text-slate-900">Rp ${Number(n.total).toLocaleString('id-ID')}</p>
+                        <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div>
                     </div>
                 </div>`;
             }).join('');
@@ -257,18 +232,19 @@
             const nota = allNota.find(n => n.id === id);
             if(!nota) return;
             document.getElementById('modalId').innerText = nota.id;
-            document.getElementById('modalTgl').innerText = nota.tanggal;
+            document.getElementById('modalTgl').innerText = formatDate(nota.tanggal);
             document.getElementById('modalTotal').innerText = `Rp ${Number(nota.total).toLocaleString('id-ID')}`;
+            
             const s = document.getElementById('modalStatus');
             const isPaid = nota.status.toLowerCase()==='paid' || nota.status.toLowerCase()==='lunas';
             s.innerText = nota.status;
-            s.className = `text-[10px] font-black uppercase ${isPaid ?'text-green-500':'text-red-500'}`;
+            s.className = `font-black uppercase ${isPaid ?'text-green-500':'text-red-500'}`;
 
-            let its = []; try { its = typeof nota.items === 'string' ? JSON.parse(nota.items) : nota.items; } catch(e) { its = [{nama: "Layanan Teknik", qty: 1, harga: nota.total}]; }
-            document.getElementById('modalItems').innerHTML = its.map(i => `
-                <div class="flex justify-between items-start">
-                    <div><p class="text-[11px] font-black text-slate-800">${i.nama}</p><p class="text-[9px] text-slate-400 font-bold">${i.qty} x Rp ${Number(i.harga).toLocaleString('id-ID')}</p></div>
-                    <span class="text-[11px] font-black text-slate-800">Rp ${Number(i.qty*i.harga).toLocaleString('id-ID')}</span>
+            let items = []; try { items = typeof nota.items === 'string' ? JSON.parse(nota.items) : nota.items; } catch(e) { items = [{nama: "Servis Alat", qty:1, harga: nota.total}]; }
+            document.getElementById('modalItems').innerHTML = items.map(i => `
+                <div class="flex justify-between">
+                    <div><p class="text-[11px] font-bold text-slate-800">${i.nama}</p><p class="text-[9px] text-slate-400">${i.qty} x Rp ${Number(i.harga).toLocaleString('id-ID')}</p></div>
+                    <span class="text-[11px] font-bold">Rp ${Number(i.qty*i.harga).toLocaleString('id-ID')}</span>
                 </div>`).join('');
 
             document.getElementById('modalPrintBtn').onclick = () => downloadPDF(nota.id);
@@ -276,8 +252,7 @@
         }
 
         function closeNota() { document.getElementById('notaModal').classList.add('hidden'); }
-        function changePage(dir) { currentPage += dir; renderNota(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-        
+        function changePage(dir) { currentPage += dir; renderNota(); window.scrollTo(0,0); }
         function filterNota() {
             const d = document.getElementById('filterDate').value;
             const s = document.getElementById('filterStatus').value;
@@ -292,51 +267,45 @@
         async function downloadPDF(id) {
             const n = allNota.find(x => x.id === id);
             if (!n) return;
+            Swal.fire({ title: 'Menyiapkan Nota...', didOpen: () => Swal.showLoading() });
 
-            Swal.fire({ title: 'Menyiapkan Nota...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-            // Pengaturan Status dan Warna
             const isP = n.status.toLowerCase() === 'paid' || n.status.toLowerCase() === 'lunas';
-            const colorStatus = isP ? '#16a34a' : '#dc2626';
+            const accentColor = isP ? '#16a34a' : '#dc2626';
 
-            // Isi Data ke Area Print Tersembunyi
+            // Set Data ke Template Cetak
             document.getElementById('pdf-id').innerText = n.id;
-            document.getElementById('pdf-tgl').innerText = n.tanggal;
+            document.getElementById('pdf-tgl').innerText = formatDate(n.tanggal);
             document.getElementById('pdf-nama').innerText = user.nama.toUpperCase();
             document.getElementById('pdf-status').innerText = n.status;
-            document.getElementById('pdf-status').style.color = colorStatus;
+            document.getElementById('pdf-status').style.color = accentColor;
+            document.getElementById('pdf-status').style.borderColor = accentColor;
             document.getElementById('pdf-total').innerText = `Rp ${Number(n.total).toLocaleString('id-ID')}`;
             
-            // Watermark
             const wm = document.getElementById('pdf-watermark');
             wm.innerText = isP ? 'LUNAS' : 'TAGIHAN';
-            wm.style.color = colorStatus;
-            wm.style.borderColor = colorStatus;
+            wm.style.color = accentColor;
+            wm.style.borderColor = accentColor;
 
-            // Render Items ke Tabel PDF
-            let its = []; 
-            try { its = typeof n.items === 'string' ? JSON.parse(n.items) : n.items; } 
-            catch(e) { its = [{nama: "Layanan Teknik", qty: 1, harga: n.total}]; }
+            let its = []; try { its = typeof n.items === 'string' ? JSON.parse(n.items) : n.items; } catch(e) { its = [{nama: "Servis Alat", qty:1, harga: n.total}]; }
 
             document.getElementById('pdf-items').innerHTML = its.map(i => `
-                <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 12px;">${i.nama}</td>
-                    <td style="padding: 12px; text-align: center;">${i.qty}</td>
-                    <td style="padding: 12px; text-align: right;">${Number(i.harga).toLocaleString('id-ID')}</td>
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="padding: 12px; border-right: 1px solid black;">${i.nama}</td>
+                    <td style="padding: 12px; text-align: center; border-right: 1px solid black;">${i.qty}</td>
+                    <td style="padding: 12px; text-align: right; border-right: 1px solid black;">${Number(i.harga).toLocaleString('id-ID')}</td>
                     <td style="padding: 12px; text-align: right; font-weight: bold;">${Number(i.qty * i.harga).toLocaleString('id-ID')}</td>
                 </tr>
             `).join('');
 
-            // Jalankan html2pdf
             const element = document.getElementById('notaPrintArea');
             element.classList.remove('hidden');
 
             const opt = {
-                margin: 10,
+                margin: 0,
                 filename: `Nota-${n.id}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { scale: 3, useCORS: true, letterRendering: true },
+                jsPDF: { unit: 'px', format: [794, 1123], orientation: 'portrait' }
             };
 
             html2pdf().set(opt).from(element).save().then(() => {
