@@ -3,184 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard CRM - Nanda Teknik</title>
+    <title>Monitoring Antrean - Nanda Teknik</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F8FAFC; color: #1E293B; }
-        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.4); }
-        .bg-mesh { background-color: #f8fafc; background-image: radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.1) 0, transparent 50%), radial-gradient(at 50% 0%, rgba(29, 78, 216, 0.1) 0, transparent 50%); }
+        .bg-mesh { background-image: radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.05) 0, transparent 50%), radial-gradient(at 100% 100%, rgba(29, 78, 216, 0.05) 0, transparent 50%); }
+        .skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite; }
+        @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
 </head>
-<body class="bg-mesh min-h-screen">
+<body class="bg-mesh min-h-screen pb-20">
 
-    <div class="max-w-7xl mx-auto px-4 py-8 lg:py-12">
-        <nav class="flex justify-between items-center mb-12">
-            <div class="flex items-center space-x-3">
-                <div class="bg-blue-600 p-2.5 rounded-2xl shadow-lg shadow-blue-500/30">
-                    <i data-lucide="wrench" class="text-white w-6 h-6"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-black tracking-tighter text-slate-900 leading-none">NANDA TEKNIK</h1>
-                    <p class="text-[10px] font-bold text-blue-600 uppercase tracking-[0.2em]">CRM Dashboard</p>
-                </div>
+    <div class="max-w-3xl mx-auto px-6 py-10">
+        <header class="text-center mb-12">
+            <div class="bg-blue-600 w-16 h-16 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-xl shadow-blue-500/20">
+                <i data-lucide="activity" class="text-white w-8 h-8"></i>
             </div>
-            <div id="statusTime" class="text-right hidden md:block">
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Waktu Sistem</p>
-                <p id="currentTime" class="text-sm font-black text-slate-800">00:00:00</p>
+            <h1 class="text-3xl font-black text-slate-900 tracking-tight">Status Pengerjaan</h1>
+            <p class="text-slate-500 font-medium mt-2">Daftar antrean jasa yang sedang diproses</p>
+        </header>
+
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm text-center">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Sedang Proses</p>
+                <h3 id="countProses" class="text-2xl font-black text-blue-600">0</h3>
             </div>
-        </nav>
+            <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm text-center">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Menunggu</p>
+                <h3 id="countTunggu" class="text-2xl font-black text-orange-500">0</h3>
+            </div>
+        </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
-            <div class="lg:col-span-4 space-y-8">
-                <div id="loginSection" class="glass-card p-8 rounded-[2.5rem] shadow-2xl shadow-blue-900/5">
-                    <h3 class="text-xl font-black text-slate-900 mb-2 italic">Admin Access</h3>
-                    <p class="text-slate-500 text-xs mb-8 font-medium">Silahkan masuk untuk mengelola Work Order.</p>
-                    
-                    <form id="loginForm" class="space-y-5">
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Username</label>
-                            <div class="relative">
-                                <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                                <input type="text" id="username" class="w-full pl-11 pr-4 py-3.5 bg-white rounded-2xl border border-slate-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-bold" placeholder="ID Admin">
-                            </div>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Password</label>
-                            <div class="relative">
-                                <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                                <input type="password" id="password" class="w-full pl-11 pr-4 py-3.5 bg-white rounded-2xl border border-slate-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-bold" placeholder="••••••••">
-                            </div>
-                        </div>
-                        <button type="submit" class="w-full bg-slate-900 hover:bg-blue-600 text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-slate-900/10 active:scale-95 flex items-center justify-center space-x-2">
-                            <span>Otorisasi Sekarang</span>
-                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                        </button>
-                    </form>
-                </div>
+        <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+            <div class="p-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+                <h2 class="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center">
+                    <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                    Antrean Aktif
+                </h2>
+                <button onclick="fetchAntrean()" class="text-slate-400 hover:text-blue-600 transition-all">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                </button>
+            </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-white p-6 rounded-[2rem] border border-slate-100">
-                        <p class="text-[9px] font-black text-slate-400 uppercase mb-2">Total Antrean</p>
-                        <h4 class="text-3xl font-black text-slate-900">24</h4>
-                    </div>
-                    <div class="bg-white p-6 rounded-[2rem] border border-slate-100">
-                        <p class="text-[9px] font-black text-orange-400 uppercase mb-2">Proses</p>
-                        <h4 class="text-3xl font-black text-slate-900">08</h4>
-                    </div>
+            <div id="antreanList" class="divide-y divide-slate-50">
+                <div class="p-8 space-y-4">
+                    <div class="skeleton h-12 rounded-2xl w-full"></div>
+                    <div class="skeleton h-12 rounded-2xl w-3/4"></div>
                 </div>
             </div>
 
-            <div class="lg:col-span-8">
-                <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden min-h-[500px]">
-                    <div class="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
-                        <div>
-                            <h3 class="text-xl font-extrabold text-slate-900 tracking-tight">Monitoring Antrean Jasa</h3>
-                            <p class="text-xs text-slate-500 font-medium">Pantau status pengerjaan teknisi secara real-time.</p>
-                        </div>
-                        <div class="flex space-x-2">
-                            <span class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
-                            <span class="text-[10px] font-black uppercase text-slate-400 tracking-widest leading-none">Live Feed</span>
-                        </div>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">
-                                    <th class="px-8 py-5 text-left">Pelanggan</th>
-                                    <th class="px-8 py-5 text-left">Layanan</th>
-                                    <th class="px-8 py-5 text-center">Status</th>
-                                    <th class="px-8 py-5 text-right">Teknisi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="woData" class="divide-y divide-slate-50">
-                                <tr class="hover:bg-blue-50/30 transition-all">
-                                    <td class="px-8 py-6">
-                                        <div class="text-sm font-black text-slate-900">Bpk. Aris</div>
-                                        <div class="text-[10px] text-slate-400 font-bold uppercase">#NT-2026-001</div>
-                                    </td>
-                                    <td class="px-8 py-6">
-                                        <div class="text-sm font-bold text-slate-700">Service Kulkas 2 Pintu</div>
-                                        <div class="text-[10px] text-blue-500 font-bold italic">Perbaikan Kompresor</div>
-                                    </td>
-                                    <td class="px-8 py-6 text-center">
-                                        <span class="px-4 py-1.5 bg-blue-100 text-blue-600 rounded-xl text-[9px] font-black uppercase tracking-tighter">Proses</span>
-                                    </td>
-                                    <td class="px-8 py-6 text-right font-bold text-slate-600 text-sm">Andi S.</td>
-                                </tr>
-                                <tr class="hover:bg-blue-50/30 transition-all">
-                                    <td class="px-8 py-6">
-                                        <div class="text-sm font-black text-slate-900">Ibu Lusi</div>
-                                        <div class="text-[10px] text-slate-400 font-bold uppercase">#NT-2026-004</div>
-                                    </td>
-                                    <td class="px-8 py-6">
-                                        <div class="text-sm font-bold text-slate-700">Pasang AC Baru</div>
-                                        <div class="text-[10px] text-orange-500 font-bold italic">Menunggu Jadwal</div>
-                                    </td>
-                                    <td class="px-8 py-6 text-center">
-                                        <span class="px-4 py-1.5 bg-orange-100 text-orange-600 rounded-xl text-[9px] font-black uppercase tracking-tighter">Tunggu</span>
-                                    </td>
-                                    <td class="px-8 py-6 text-right font-bold text-slate-600 text-sm">-</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="p-8 bg-slate-50/30 text-center border-t border-slate-50">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">
-                            Data diperbarui setiap 5 menit secara otomatis dari Google Sheets
-                        </p>
-                    </div>
-                </div>
+            <div class="p-6 bg-slate-50/50 text-center">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Pembaruan Otomatis Real-time</p>
             </div>
+        </div>
+
+        <div class="mt-12 text-center">
+            <a href="login.html" class="inline-flex items-center space-x-2 bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-xl transition-all active:scale-95">
+                <i data-lucide="lock" class="w-4 h-4"></i>
+                <span>Portal Login Admin</span>
+            </a>
+            <p class="text-slate-400 text-[10px] mt-4 font-bold uppercase tracking-widest italic">&copy; 2026 Nanda Teknik Banyuwangi</p>
         </div>
     </div>
 
     <script>
-        // Init Lucide Icons
+        // Inisialisasi Ikon
         lucide.createIcons();
 
-        // Time Script
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('currentTime').innerText = now.toLocaleTimeString('id-ID');
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
+        // Gantilah URL ini dengan URL Apps Script Anda
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxgP-PtgOPTU-SpvpT4ATSvIUk5Vsg5VDmagnLYSzKhZfOhd5oGAZmh_XV8KOyeN30dBw/exec';
 
-        // Login Handler
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const user = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
+        async function fetchAntrean() {
+            const listContainer = document.getElementById('antreanList');
+            
+            try {
+                const response = await fetch(SCRIPT_URL + '?action=getLiveWorkload');
+                const result = await response.json();
 
-            if(user === "admin" && pass === "nanda123") {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Akses Diterima',
-                    text: 'Selamat datang di pusat kendali.',
-                    timer: 1500,
-                    showConfirmButton: false,
-                    customClass: { popup: 'rounded-[2rem]' }
-                }).then(() => {
-                    // Simpan session admin sederhana
-                    localStorage.setItem('adminSession', 'true');
-                    window.location.href = "admin_panel.html"; // Arahkan ke panel kelola
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal Masuk',
-                    text: 'Username atau password salah!',
-                    confirmButtonColor: '#0f172a',
-                    customClass: { popup: 'rounded-[2rem]' }
-                });
+                if (result.status === 'success') {
+                    // FILTER: Hanya ambil data yang statusnya BUKAN "Selesai"
+                    const activeWork = result.data.filter(item => 
+                        !item.status.toLowerCase().includes('selesai')
+                    );
+
+                    if (activeWork.length === 0) {
+                        listContainer.innerHTML = `
+                            <div class="p-12 text-center">
+                                <i data-lucide="smile" class="w-12 h-12 text-slate-200 mx-auto mb-4"></i>
+                                <p class="text-slate-400 text-sm font-bold">Semua pekerjaan telah selesai!</p>
+                            </div>`;
+                        updateCounts(0, 0);
+                    } else {
+                        let html = '';
+                        let prosesCount = 0;
+                        let tungguCount = 0;
+
+                        activeWork.forEach(item => {
+                            const statusLower = item.status.toLowerCase();
+                            let statusClass = 'bg-slate-100 text-slate-600';
+                            
+                            if(statusLower.includes('proses')) {
+                                statusClass = 'bg-blue-100 text-blue-600';
+                                prosesCount++;
+                            } else {
+                                statusClass = 'bg-orange-100 text-orange-600';
+                                tungguCount++;
+                            }
+
+                            html += `
+                                <div class="p-6 flex justify-between items-center hover:bg-slate-50 transition-all">
+                                    <div class="pr-4">
+                                        <h4 class="text-sm font-black text-slate-800 uppercase tracking-tight">${item.pekerjaan}</h4>
+                                        <p class="text-[10px] text-slate-400 font-bold mt-1">CLIENT: ${item.nama}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-tighter ${statusClass}">
+                                            ${item.status}
+                                        </span>
+                                        <p class="text-[9px] text-slate-300 font-bold mt-2">${item.tanggal}</p>
+                                    </div>
+                                </div>`;
+                        });
+                        
+                        listContainer.innerHTML = html;
+                        updateCounts(prosesCount, tungguCount);
+                    }
+                }
+                lucide.createIcons();
+            } catch (error) {
+                listContainer.innerHTML = `<div class="p-8 text-center text-red-400 font-bold text-xs uppercase">Gagal memuat data dari server</div>`;
             }
-        });
+        }
+
+        function updateCounts(p, t) {
+            document.getElementById('countProses').innerText = p;
+            document.getElementById('countTunggu').innerText = t;
+        }
+
+        // Jalankan saat load
+        fetchAntrean();
+        // Refresh otomatis setiap 1 menit
+        setInterval(fetchAntrean, 60000);
     </script>
 </body>
 </html>
