@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -17,11 +16,12 @@
         .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.5); }
         .btn-primary:active { transform: scale(0.95); transition: 0.2s; }
         ::-webkit-scrollbar { width: 0px; }
+        .hidden { display: none; }
     </style>
 </head>
 <body class="bg-slate-200">
 
-    <div class="mobile-container shadow-2xl pb-10">
+    <div class="mobile-container shadow-2xl pb-24">
         <div class="blob w-64 h-64 bg-blue-400 -top-20 -right-20"></div>
         <div class="blob w-64 h-64 bg-indigo-300 bottom-1/4 -left-20" style="animation-delay: 2s;"></div>
 
@@ -41,7 +41,7 @@
                 <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Hari Ini Selesai</p>
                 <div class="flex items-center justify-center space-x-1">
                     <span id="statsSelesai" class="text-3xl font-black text-slate-800">0</span>
-                    <span class="text-green-500 text-[10px] font-bold text-lg">✓</span>
+                    <span class="text-green-500 text-lg">✓</span>
                 </div>
             </div>
             <div class="glass-card p-6 rounded-[2.5rem] shadow-xl text-center">
@@ -69,7 +69,30 @@
             </div>
         </div>
 
-        <div class="px-8 mt-12 relative z-10">
+        <div class="px-8 mt-10 relative z-10">
+            <div class="glass-card rounded-[2.5rem] p-6 shadow-xl border border-blue-50">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-black text-slate-800 text-[12px] uppercase tracking-widest">Jadwal Kerja</h3>
+                    <div class="flex space-x-2">
+                        <button onclick="prevMonth()" class="p-1 text-slate-400 hover:text-blue-600">◀</button>
+                        <span id="calendarMonth" class="text-[10px] font-black text-blue-600 uppercase tracking-tighter">Mei 2026</span>
+                        <button onclick="nextMonth()" class="p-1 text-slate-400 hover:text-blue-600">▶</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-7 gap-1 text-center mb-2">
+                    <div class="text-[8px] font-bold text-slate-400 uppercase">Min</div>
+                    <div class="text-[8px] font-bold text-slate-400 uppercase">Sen</div>
+                    <div class="text-[8px] font-bold text-slate-400 uppercase">Sel</div>
+                    <div class="text-[8px] font-bold text-slate-400 uppercase">Rab</div>
+                    <div class="text-[8px] font-bold text-slate-400 uppercase">Kam</div>
+                    <div class="text-[8px] font-bold text-slate-400 uppercase">Jum</div>
+                    <div class="text-[8px] font-bold text-slate-400 uppercase">Sab</div>
+                </div>
+                <div id="calendarDays" class="grid grid-cols-7 gap-1"></div>
+            </div>
+        </div>
+
+        <div class="px-8 mt-10 relative z-10">
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center space-x-2">
                     <span class="relative flex h-3 w-3">
@@ -80,7 +103,6 @@
                 </div>
                 <p id="liveDate" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">-- --- ----</p>
             </div>
-
             <div id="liveFeed" class="space-y-4">
                 <div class="animate-pulse bg-slate-50 p-4 rounded-[2rem] border border-dashed border-slate-200">
                     <div class="flex items-center space-x-3">
@@ -94,12 +116,25 @@
         <footer class="mt-16 text-center px-8 pb-10">
             <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.3em]">© 2026 NANDA TEKNIK BANYUWANGI</p>
         </footer>
+
+        <div id="installPrompt" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] z-[100]">
+            <div class="bg-slate-900 text-white p-5 rounded-[2.5rem] shadow-2xl flex items-center justify-between border border-slate-700">
+                <div class="flex items-center space-x-3 text-left">
+                    <div class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg">🛠️</div>
+                    <div>
+                        <p class="text-[10px] font-black uppercase text-blue-400">Instal Aplikasi</p>
+                        <p class="text-[9px] text-slate-400 font-medium">Lebih ringan & cepat</p>
+                    </div>
+                </div>
+                <button id="btnInstall" class="bg-blue-600 text-white px-5 py-2 rounded-2xl text-[10px] font-black uppercase">Instal</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // GANTI DENGAN URL WEB APP LU
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxY4VcR8IEpoLiNvvXEEIAphD6Z4Y2BkAQS2GMLE-NPuZu6DMFwDFRPTVBX-M_KosKBTA/exec';
 
+        // --- 1. LOGIKA WAKTU & DATA ---
         function updateTime() {
             const options = { day: 'numeric', month: 'short', year: 'numeric' };
             document.getElementById('liveDate').innerText = new Date().toLocaleDateString('id-ID', options);
@@ -112,65 +147,79 @@
                     body: JSON.stringify({ action: 'getLiveWorkload' })
                 });
                 const res = await response.json();
-
                 if (res.status === 'success') {
-                    // Update Angka Statistik
                     document.getElementById('statsSelesai').innerText = res.stats.selesai;
                     document.getElementById('statsProses').innerText = res.stats.proses;
-
-                    // Update Feed Aktivitas
                     const feed = document.getElementById('liveFeed');
                     if (!res.data || res.data.length === 0) {
-                        feed.innerHTML = `
-                            <div class="text-center py-8 bg-slate-50 rounded-[2rem] border border-dashed border-slate-200">
-                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Belum ada antrean hari ini</p>
-                            </div>`;
+                        feed.innerHTML = `<div class="text-center py-8 bg-slate-50 rounded-[2rem] border border-dashed border-slate-200"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Belum ada antrean hari ini</p></div>`;
                         return;
                     }
-
                     feed.innerHTML = res.data.map(item => {
                         const isSelesai = item.status.toLowerCase().includes('selesai');
-                        return `
-                        <div class="bg-white p-4 rounded-[2rem] border border-slate-100 flex items-center justify-between shadow-sm">
+                        return `<div class="bg-white p-4 rounded-[2rem] border border-slate-100 flex items-center justify-between shadow-sm">
                             <div class="flex items-center space-x-3">
-                                <div class="w-11 h-11 ${isSelesai ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'} rounded-2xl flex items-center justify-center">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                </div>
-                                <div>
-                                    <p class="text-[11px] font-black text-slate-800 tracking-tight">${item.nama}</p>
-                                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">${item.pekerjaan}</p>
-                                </div>
+                                <div class="w-11 h-11 ${isSelesai ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'} rounded-2xl flex items-center justify-center"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+                                <div><p class="text-[11px] font-black text-slate-800 tracking-tight">${item.nama}</p><p class="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">${item.pekerjaan}</p></div>
                             </div>
-                            <span class="px-3 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-widest ${isSelesai ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}">
-                                ${item.status}
-                            </span>
+                            <span class="px-3 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-widest ${isSelesai ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}">${item.status}</span>
                         </div>`;
                     }).join('');
                 }
-            } catch (err) {
-                console.error("Gagal ambil data:", err);
-            }
+            } catch (err) { console.error("Gagal ambil data:", err); }
         }
 
-        if (&#39;serviceWorker&#39; in navigator) {
-            window.addEventListener(&#39;load&#39;, () =&gt; {
-                navigator.serviceWorker.register(&#39;https://raw.githack.com/nandateknik/blogger/main/sw.js&#39;)
-                    .then(reg =&gt; console.log(&#39;SW Registered&#39;, reg))
-                    .catch(err =&gt; console.log(&#39;SW Error&#39;, err));
+        // --- 2. LOGIKA KALENDER ---
+        let currDate = new Date();
+        function renderCalendar() {
+            const mYear = document.getElementById('calendarMonth');
+            const dElem = document.getElementById('calendarDays');
+            const year = currDate.getFullYear();
+            const month = currDate.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const lastDate = new Date(year, month + 1, 0).getDate();
+            const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            
+            mYear.innerText = `${months[month]} ${year}`;
+            dElem.innerHTML = '';
+            for (let i = 0; i < firstDay; i++) { dElem.innerHTML += `<div class="h-8"></div>`; }
+            for (let d = 1; d <= lastDate; d++) {
+                const isToday = d === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
+                dElem.innerHTML += `<div class="h-10 flex flex-col items-center justify-center rounded-xl text-[10px] font-bold ${isToday ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-slate-600 hover:bg-slate-50'}">${d}</div>`;
+            }
+        }
+        function prevMonth() { currDate.setMonth(currDate.getMonth() - 1); renderCalendar(); }
+        function nextMonth() { currDate.setMonth(currDate.getMonth() + 1); renderCalendar(); }
+
+        // --- 3. LOGIKA PWA & INSTALL PROMPT ---
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installPrompt').classList.remove('hidden');
+        });
+
+        document.getElementById('btnInstall').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                document.getElementById('installPrompt').classList.add('hidden');
+            }
+        });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('SW Registered'))
+                    .catch(err => console.log('SW Error', err));
             });
         }
 
-        // Sinkronisasi Back Button Android (Eksperimental)
-        window.addEventListener(&#39;popstate&#39;, function(event) {
-            const iframe = document.getElementById(&#39;gas-iframe&#39;);
-            iframe.contentWindow.postMessage(&#39;go-back&#39;, &#39;*&#39;);
-        });
-
-        // Jalankan awal
+        // Inisialisasi
         updateTime();
         fetchLiveWorkload();
-
-        // Auto Refresh tiap 60 detik biar hemat kuota Google Script
+        renderCalendar();
         setInterval(fetchLiveWorkload, 60000);
     </script>
 </body>
