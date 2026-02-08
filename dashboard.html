@@ -3,116 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Service Dashboard - Nanda Teknik</title>
+    <title>Dashboard - Nanda Teknik</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0F172A; color: #F8FAFC; }
-        .mobile-container { max-width: 480px; min-height: 100vh; margin: 0 auto; background: #0F172A; position: relative; }
-        .status-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
-        .active-glow { box-shadow: 0 0 15px rgba(34, 197, 94, 0.4); }
-        .emergency-gradient { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F8FAFC; color: #1E293B; }
+        .mobile-container { max-width: 480px; min-height: 100vh; margin: 0 auto; background: #ffffff; position: relative; }
+        .card-gradient { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); }
+        .bottom-nav { max-width: 480px; left: 50%; transform: translateX(-50%); }
+        .glass-icon { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(8px); }
+        .menu-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid #F1F5F9; }
+        .menu-card:active { transform: scale(0.92); background-color: #F1F5F9; }
+        
+        /* Animasi halu buat background */
+        .blob { position: absolute; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; blur: 40px; }
+
+        /* Tambahin ini di bagian style biar gelembungnya "bernafas" */
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1) translate(0, 0); opacity: 0.5; }
+            50% { transform: scale(1.1) translate(-10px, 10px); opacity: 0.8; }
+        }
+        
+        .blob { 
+            animation: pulse-slow 8s infinite ease-in-out; 
+        }
     </style>
 </head>
-<body>
+<body class="bg-gray-200">
 
-    <div class="mobile-container pb-32">
-        <header class="p-6 flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-extrabold tracking-tight">System <span class="text-blue-500">Overview</span></h1>
-                <p class="text-slate-400 text-xs mt-1">Halo, <span id="userName" class="text-white font-bold">Client Name</span></p>
-            </div>
-            <div class="relative">
-                <div class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <script>
+        if (!localStorage.getItem('userPelanggan')) {
+            window.location.replace('login.html');
+        }
+    </script>
+
+    <div class="mobile-container shadow-2xl flex flex-col pb-32 overflow-hidden">
+        
+        <header class="card-gradient pt-14 pb-24 px-8 rounded-b-[3.5rem] shadow-2xl relative overflow-hidden">
+            <div class="relative z-10 flex justify-between items-center">
+                <div>
+                    <p class="text-blue-100 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Welcome Back</p>
+                    <h1 id="userGreeting" class="text-3xl font-extrabold text-white tracking-tight leading-none">...</h1>
                 </div>
-                <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 border-2 border-[#0F172A] rounded-full"></span>
+                <button onclick="logout()" class="glass-icon p-3.5 rounded-[1.5rem] border border-white/20 active:scale-90 transition-all shadow-lg">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                </button>
             </div>
+            <div class="blob -right-10 -bottom-10"></div>
+            <div class="blob -left-20 -top-20 opacity-50"></div>
         </header>
 
-        <section class="px-6 mb-8">
-            <a href="https://wa.me/6282331201148" class="emergency-gradient w-full p-4 rounded-2xl flex items-center justify-between shadow-lg">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center animate-pulse">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <main class="px-6 -mt-12 relative z-20 flex-grow">
+            <div class="bg-white rounded-[2.5rem] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-white mb-8">
+                <div class="flex items-center space-x-4 mb-6">
+                    <div class="w-14 h-14 bg-blue-50 rounded-[1.5rem] flex items-center justify-center shadow-inner">
+                        <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                     </div>
                     <div>
-                        <p class="text-white font-black text-sm uppercase">Layanan Darurat</p>
-                        <p class="text-red-100 text-[10px]">Genset Mati / Server Down? Klik!</p>
-                    </div>
-                </div>
-                <svg class="w-5 h-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </a>
-        </section>
-
-        <section class="px-6 mb-8">
-            <h2 class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Kondisi Aset Anda</h2>
-            <div class="grid grid-cols-2 gap-3">
-                <div class="status-card p-4 rounded-2xl">
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="p-2 bg-blue-500/10 rounded-lg"><svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke-width="2"/></svg></div>
-                        <span class="text-[9px] font-bold px-2 py-1 bg-green-500/20 text-green-500 rounded-full">4 Units</span>
-                    </div>
-                    <p class="text-white font-bold text-sm">Air Conditioner</p>
-                    <p class="text-slate-500 text-[10px] mt-1 italic">Semua Berfungsi</p>
-                </div>
-                <div class="status-card p-4 rounded-2xl border-l-2 border-l-yellow-500">
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="p-2 bg-yellow-500/10 rounded-lg"><svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-width="2"/></svg></div>
-                        <span class="text-[9px] font-bold px-2 py-1 bg-yellow-500/20 text-yellow-500 rounded-full">Offline 1</span>
-                    </div>
-                    <p class="text-white font-bold text-sm">CCTV System</p>
-                    <p class="text-slate-500 text-[10px] mt-1 italic">Cek Area Parkir</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="px-6 mb-8">
-            <div class="bg-blue-600/10 border border-blue-500/20 rounded-2xl p-5 relative overflow-hidden">
-                <div class="relative z-10">
-                    <p class="text-blue-400 text-[10px] font-black uppercase tracking-widest">Jadwal Servis Berikutnya</p>
-                    <h3 class="text-white font-bold text-lg mt-1">Maintenance Genset</h3>
-                    <div class="flex items-center mt-3 space-x-4">
-                        <div class="flex items-center text-slate-300 text-xs">
-                            <svg class="w-4 h-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="2"/></svg>
-                            12 Feb 2026
-                        </div>
-                        <div class="flex items-center text-slate-300 text-xs">
-                            <svg class="w-4 h-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2"/></svg>
-                            09:00 WIB
+                        <p class="text-[9px] text-slate-400 font-black uppercase tracking-widest">Status Member</p>
+                        <div class="flex items-center mt-0.5">
+                            <span class="w-2.5 h-2.5 bg-green-500 rounded-full mr-2 shadow-[0_0_10px_rgba(34,197,94,0.5)] animate-pulse"></span>
+                            <p class="text-slate-800 text-sm font-extrabold">Premium Pelanggan</p>
                         </div>
                     </div>
                 </div>
-                <div class="absolute -right-4 -bottom-4 opacity-10">
-                    <svg class="w-24 h-24 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
+                <div class="bg-slate-50 rounded-2xl p-4 flex justify-between items-center border border-slate-100">
+                    <div class="truncate pr-4">
+                        <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tighter">Email ID</p>
+                        <p id="displayEmail" class="text-[11px] font-bold text-slate-600 truncate">...</p>
+                    </div>
+                    <div class="text-right border-l border-slate-200 pl-4">
+                        <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tighter">ID Member</p>
+                        <p class="text-[11px] font-black text-blue-600">NT-2026</p>
+                    </div>
                 </div>
             </div>
-        </section>
 
-        <section class="px-6 grid grid-cols-4 gap-4">
-            <a href="booking.html" class="flex flex-col items-center">
-                <div class="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center mb-2"><svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="2.5"/></svg></div>
-                <span class="text-[10px] text-slate-400 font-bold">Booking</span>
-            </a>
-            <a href="aset.html" class="flex flex-col items-center">
-                <div class="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center mb-2"><svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-width="2"/></svg></div>
-                <span class="text-[10px] text-slate-400 font-bold">List Aset</span>
-            </a>
-            <a href="nota.html" class="flex flex-col items-center">
-                <div class="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center mb-2"><svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" stroke-width="2"/></svg></div>
-                <span class="text-[10px] text-slate-400 font-bold">Invoices</span>
-            </a>
-            <a href="log.html" class="flex flex-col items-center">
-                <div class="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center mb-2"><svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2"/></svg></div>
-                <span class="text-[10px] text-slate-400 font-bold">History</span>
-            </a>
-        </section>
+            <h2 class="text-slate-800 font-extrabold px-2 mb-5 flex items-center text-sm uppercase tracking-widest">
+                Layanan Utama
+            </h2>
+            
+            <div class="grid grid-cols-2 gap-4 mb-10">
+                <a href="booking.html" class="menu-card bg-white p-6 rounded-[2.5rem] flex flex-col items-center text-center shadow-sm">
+                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4 shadow-sm">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    </div>
+                    <span class="text-[11px] font-extrabold text-slate-700 uppercase">Booking WO</span>
+                </a>
 
-        <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-[#0F172A]/80 backdrop-blur-lg border-t border-slate-800 p-4 flex justify-around">
-            <button class="text-blue-500"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg></button>
-            <button class="text-slate-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-width="2"/></svg></button>
+                <a href="nota.html" class="menu-card bg-white p-6 rounded-[2.5rem] flex flex-col items-center text-center shadow-sm">
+                    <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-4 shadow-sm">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    </div>
+                    <span class="text-[11px] font-extrabold text-slate-700 uppercase">Cek Nota</span>
+                </a>
+
+                <a href="ongkos.html" class="menu-card bg-white p-6 rounded-[2.5rem] flex flex-col items-center text-center shadow-sm">
+                    <div class="w-14 h-14 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center mb-4 shadow-sm">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <span class="text-[11px] font-extrabold text-slate-700 uppercase">Cek Ongkos</span>
+                </a>
+
+                <a href="berita.html" class="menu-card bg-white p-6 rounded-[2.5rem] flex flex-col items-center text-center shadow-sm">
+                    <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-4 shadow-sm">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+                    </div>
+                    <span class="text-[11px] font-extrabold text-slate-700 uppercase">Blog Berita</span>
+                </a>
+            </div>
+
+            <div class="bg-slate-900 rounded-[2.5rem] p-6 flex items-center justify-between shadow-2xl relative overflow-hidden">
+                <div class="relative z-10 flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center border border-green-500/30">
+                        <svg class="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.438 9.889-9.886.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.89 4.44-9.892 9.886-.001 2.125.569 3.857 1.602 5.378l-1.013 3.703 3.803-.995z"/></svg>
+                    </div>
+                    <div>
+                        <h4 class="text-white text-[13px] font-black uppercase tracking-tight">Butuh Bantuan?</h4>
+                        <p class="text-slate-400 text-[9px] font-bold uppercase tracking-widest">Chat Admin Nanda</p>
+                    </div>
+                </div>
+                <a href="https://wa.me/6282331201148" class="relative z-10 bg-blue-600 px-6 py-3 rounded-2xl text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-90 transition-all">
+                    Chat
+                </a>
+            </div>
+        </main>
+
+        <nav class="bottom-nav fixed bottom-6 px-6 w-full z-50">
+            <div class="bg-slate-900/95 backdrop-blur-xl rounded-[2.5rem] p-4 flex justify-around items-center shadow-2xl border border-white/10">
+                <a href="dashboard.html" class="p-4 bg-blue-600 rounded-3xl text-white shadow-lg shadow-blue-500/40 -mt-12 border-4 border-[#F8FAFC]">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
+                </a>
+                <a href="booking.html" class="p-2 text-slate-500 hover:text-white transition-all">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                </a>
+                <a href="nota.html" class="p-2 text-slate-500 hover:text-white transition-all">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </a>
+            </div>
         </nav>
+
     </div>
 
+    <script>
+        // Load Data Pelanggan
+        const user = JSON.parse(localStorage.getItem('userPelanggan'));
+        if (user) {
+            document.getElementById('userGreeting').innerText = user.nama;
+            document.getElementById('displayEmail').innerText = user.email;
+        }
+
+        function logout() {
+            Swal.fire({
+                title: 'Konfirmasi Keluar',
+                text: "Apakah Anda ingin keluar?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#2563eb',
+                cancelButtonColor: '#F1F5F9',
+                confirmButtonText: '<span class="text-white font-bold">Ya, Keluar</span>',
+                cancelButtonText: '<span class="text-slate-600 font-bold">Batal</span>',
+                customClass: {
+                    popup: 'rounded-[2.5rem]',
+                    confirmButton: 'rounded-2xl px-6 py-3',
+                    cancelButton: 'rounded-2xl px-6 py-3'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.removeItem('userPelanggan');
+                    window.location.replace('login.html');
+                }
+            })
+        }
+    </script>
 </body>
 </html>
