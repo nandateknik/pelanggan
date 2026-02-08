@@ -7,6 +7,7 @@
     <title>Nanda Teknik - Home</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href='https://raw.githack.com/nandateknik/blogger/main/manifest.json' rel='manifest'/>
 
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F8FAFC; color: #1E293B; }
@@ -150,6 +151,20 @@
                 console.error("Gagal ambil data:", err);
             }
         }
+
+        if (&#39;serviceWorker&#39; in navigator) {
+            window.addEventListener(&#39;load&#39;, () =&gt; {
+                navigator.serviceWorker.register(&#39;https://raw.githack.com/nandateknik/blogger/main/sw.js&#39;)
+                    .then(reg =&gt; console.log(&#39;SW Registered&#39;, reg))
+                    .catch(err =&gt; console.log(&#39;SW Error&#39;, err));
+            });
+        }
+
+        // Sinkronisasi Back Button Android (Eksperimental)
+        window.addEventListener(&#39;popstate&#39;, function(event) {
+            const iframe = document.getElementById(&#39;gas-iframe&#39;);
+            iframe.contentWindow.postMessage(&#39;go-back&#39;, &#39;*&#39;);
+        });
 
         // Jalankan awal
         updateTime();
