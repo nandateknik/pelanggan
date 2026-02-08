@@ -63,4 +63,287 @@
 
         <div class="mx-6 -mt-10 relative z-20 glass-filter p-5 rounded-[2.5rem] shadow-xl border border-white/50 space-y-3">
             <div class="flex space-x-2">
-                <div class="flex-1 bg-slate-50/50 rounded-2xl px
+                <div class="flex-1 bg-slate-50/50 rounded-2xl px-4 py-3 border border-slate-100">
+                    <input type="date" id="filterDate" onchange="filterNota()" class="bg-transparent text-[10px] font-black outline-none text-slate-500 w-full uppercase cursor-pointer">
+                </div>
+                <div class="flex-1 bg-slate-50/50 rounded-2xl px-4 py-3 border border-slate-100">
+                    <select id="filterStatus" onchange="filterNota()" class="bg-transparent text-[10px] font-black outline-none text-slate-500 w-full uppercase cursor-pointer">
+                        <option value="ALL">Semua</option>
+                        <option value="Paid">Lunas</option>
+                        <option value="Unpaid">Tagihan</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <main id="notaList" class="p-6 space-y-5 relative z-10 flex-grow">
+            <div class="flex flex-col items-center justify-center p-20 space-y-4">
+                <div class="animate-spin rounded-full h-10 w-10 border-4 border-blue-600 border-t-transparent"></div>
+            </div>
+        </main>
+
+        <div id="pagination" class="flex justify-between items-center px-10 py-4 hidden relative z-10">
+            <button onclick="changePage(-1)" id="prevBtn" class="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 active:scale-90 transition-all disabled:opacity-30">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <span id="pageLabel" class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Hal 1</span>
+            <button onclick="changePage(1)" id="nextBtn" class="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 active:scale-90 transition-all disabled:opacity-30">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+        </div>
+
+        <div id="notaModal" class="fixed inset-0 z-[60] hidden">
+            <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeNota()"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-4 modal-animate flex justify-center">
+                <div class="w-full max-w-[440px]">
+                    <div class="receipt-paper rounded-t-[2.5rem] overflow-hidden p-8 pb-12">
+                        <div class="text-center mb-6 border-b border-dashed border-slate-200 pb-6">
+                            <h2 class="text-xl font-black text-slate-800">NANDA TEKNIK</h2>
+                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-1">Digital Receipt</p>
+                        </div>
+                        <div class="space-y-3 mb-6">
+                            <div class="flex justify-between text-[10px] uppercase font-bold"><span class="text-slate-400">Invoice</span><span id="modalId" class="text-slate-800"></span></div>
+                            <div class="flex justify-between text-[10px] uppercase font-bold"><span class="text-slate-400">Tanggal</span><span id="modalTgl" class="text-slate-800"></span></div>
+                            <div class="flex justify-between text-[10px] uppercase font-bold"><span class="text-slate-400">Status</span><span id="modalStatus"></span></div>
+                        </div>
+                        <div id="modalItems" class="space-y-4 mb-8 border-y border-slate-50 py-6"></div>
+                        <div class="flex justify-between items-center mb-10">
+                            <span class="text-xs font-black uppercase tracking-widest text-slate-400">Total Akhir</span>
+                            <span id="modalTotal" class="text-2xl font-black text-blue-600 tracking-tighter"></span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="closeNota()" class="bg-slate-100 text-slate-500 p-5 rounded-[1.5rem] text-[10px] font-black uppercase">Tutup</button>
+                            <button id="modalPrintBtn" class="bg-blue-600 text-white p-5 rounded-[1.5rem] text-[10px] font-black uppercase shadow-lg shadow-blue-200">Unduh PDF</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <nav class="bottom-nav fixed bottom-6 px-6 w-full z-50">
+            <div class="bg-slate-900/95 backdrop-blur-xl rounded-[2.5rem] p-4 flex justify-around items-center shadow-2xl border border-white/10">
+                <a href="dashboard.html" class="p-2 text-slate-500 hover:text-white transition-all">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                </a>
+                <a href="booking.html" class="p-2 text-slate-500 hover:text-white transition-all">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                </a>
+                <a href="nota.html" class="p-4 bg-blue-600 rounded-3xl text-white shadow-lg shadow-blue-500/40 -mt-12 border-4 border-[#F8FAFC]">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <div id="notaPrintArea" class="hidden" style="width: 790px; padding: 40px; background: white; color: black; position: relative;">
+        <div id="pdf-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 80px; font-weight: bold; opacity: 0.1; border: 10px solid; padding: 20px; border-radius: 20px; z-index: 0;"></div>
+        
+        <div style="position: relative; z-index: 1;">
+            <div style="text-align: center; border-bottom: 2px solid black; padding-bottom: 20px; margin-bottom: 30px;">
+                <h1 style="font-size: 28px; font-weight: 800; margin: 0;">NANDA TEKNIK BANYUWANGI</h1>
+                <p style="font-size: 12px; margin: 5px 0;">Network, Software & Electrical Engineering</p>
+                <p style="font-size: 11px; margin: 0;">Sukowidi Indah Residence, Blok D-5 Banyuwangi | Wa: 082331201148</p>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-bottom: 30px; font-size: 13px;">
+                <div>
+                    <p><strong>INVOICE:</strong> <span id="pdf-id"></span></p>
+                    <p><strong>KEPADA:</strong> <span id="pdf-nama"></span></p>
+                </div>
+                <div style="text-align: right;">
+                    <p><strong>TANGGAL:</strong> <span id="pdf-tgl"></span></p>
+                    <p><strong>STATUS:</strong> <span id="pdf-status" style="font-weight: 800; text-transform: uppercase;"></span></p>
+                </div>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px; font-size: 13px;">
+                <thead>
+                    <tr style="background: #f1f5f9; border-bottom: 2px solid black;">
+                        <th style="padding: 12px; text-align: left;">DESKRIPSI LAYANAN / BARANG</th>
+                        <th style="padding: 12px; text-align: center;">QTY</th>
+                        <th style="padding: 12px; text-align: right;">HARGA</th>
+                        <th style="padding: 12px; text-align: right;">SUBTOTAL</th>
+                    </tr>
+                </thead>
+                <tbody id="pdf-items"></tbody>
+                <tfoot>
+                    <tr style="border-top: 2px solid black; font-weight: 800; font-size: 16px;">
+                        <td colspan="3" style="padding: 15px; text-align: right;">TOTAL AKHIR:</td>
+                        <td id="pdf-total" style="padding: 15px; text-align: right; color: #2563eb;"></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 50px;">
+                <div style="border: 1px dashed #ccc; padding: 10px; border-radius: 8px; width: 250px;">
+                    <p style="font-weight: bold; margin-bottom: 5px; text-decoration: underline;">INFO PEMBAYARAN:</p>
+                    <p>Bank BCA - Nanda Krisbianto</p>
+                    <p>No. Rek: 1801826011</p>
+                    <p style="margin-top: 5px; font-style: italic;">*Simpan bukti bayar ini sebagai garansi resmi.</p>
+                </div>
+                <div style="text-align: center; width: 200px;">
+                    <p style="margin-bottom: 60px; font-weight: bold;">Hormat Kami,</p>
+                    <p style="font-weight: bold;">( NANDA KRISBIANTO )</p>
+                    <p>Owner Nanda Teknik</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyUOVdkpEZLHF6L8_sm_ESHU1I9Uj4AlrpkNbpqXFOjNqzuwcAeaTQ-dEbjQyuOw5aQWQ/exec';
+        const user = JSON.parse(localStorage.getItem('userPelanggan'));
+        let allNota = [], filteredNota = [], currentPage = 1, itemsPerPage = 5;
+
+        if (!user) window.location.replace('login.html');
+
+        window.onload = () => { loadNota(); };
+
+        function loadNota() {
+            fetch(scriptURL, { method: 'POST', body: JSON.stringify({ action: 'getNota', email: user.email }) })
+            .then(r => r.json())
+            .then(res => {
+                allNota = res.data || [];
+                filteredNota = allNota;
+                renderNota();
+            })
+            .catch(err => {
+                document.getElementById('notaList').innerHTML = `<p class="text-center py-10 text-xs font-bold text-red-400">Gagal memuat data nota.</p>`;
+            });
+        }
+
+        function renderNota() {
+            const list = document.getElementById('notaList');
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const paginatedData = filteredNota.slice(start, end);
+
+            if (paginatedData.length === 0) {
+                list.innerHTML = `<div class="bg-white p-12 rounded-[3rem] text-center border border-dashed border-slate-200 mt-10 text-[10px] font-black text-slate-400 uppercase tracking-widest">Tidak ada nota</div>`;
+                document.getElementById('pagination').classList.add('hidden');
+                return;
+            }
+
+            document.getElementById('pagination').classList.remove('hidden');
+            document.getElementById('pageLabel').innerText = `Hal ${currentPage}`;
+            document.getElementById('prevBtn').disabled = currentPage === 1;
+            document.getElementById('nextBtn').disabled = end >= filteredNota.length;
+
+            list.innerHTML = paginatedData.map(n => {
+                const isPaid = n.status.toLowerCase() === 'paid' || n.status.toLowerCase() === 'lunas';
+                return `
+                <div onclick="openNota('${n.id}')" class="card-nota bg-white p-6 rounded-[2.5rem] shadow-sm flex flex-col space-y-4 cursor-pointer">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 ${isPaid ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'} rounded-2xl flex items-center justify-center">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </div>
+                            <div>
+                                <h4 class="font-extrabold text-slate-800 text-[13px] tracking-tight">${n.id}</h4>
+                                <p class="text-[9px] text-slate-400 font-black uppercase tracking-widest">${n.tanggal}</p>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-widest ${isPaid ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">${n.status}</span>
+                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-50">
+                        <div><p class="text-[8px] text-slate-400 font-black uppercase tracking-widest">Total</p><p class="text-base font-black text-slate-900">Rp ${Number(n.total).toLocaleString('id-ID')}</p></div>
+                        <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function openNota(id) {
+            const nota = allNota.find(n => n.id === id);
+            if(!nota) return;
+            document.getElementById('modalId').innerText = nota.id;
+            document.getElementById('modalTgl').innerText = nota.tanggal;
+            document.getElementById('modalTotal').innerText = `Rp ${Number(nota.total).toLocaleString('id-ID')}`;
+            const s = document.getElementById('modalStatus');
+            const isPaid = nota.status.toLowerCase()==='paid' || nota.status.toLowerCase()==='lunas';
+            s.innerText = nota.status;
+            s.className = `text-[10px] font-black uppercase ${isPaid ?'text-green-500':'text-red-500'}`;
+
+            let its = []; try { its = typeof nota.items === 'string' ? JSON.parse(nota.items) : nota.items; } catch(e) { its = [{nama: "Layanan Teknik", qty: 1, harga: nota.total}]; }
+            document.getElementById('modalItems').innerHTML = its.map(i => `
+                <div class="flex justify-between items-start">
+                    <div><p class="text-[11px] font-black text-slate-800">${i.nama}</p><p class="text-[9px] text-slate-400 font-bold">${i.qty} x Rp ${Number(i.harga).toLocaleString('id-ID')}</p></div>
+                    <span class="text-[11px] font-black text-slate-800">Rp ${Number(i.qty*i.harga).toLocaleString('id-ID')}</span>
+                </div>`).join('');
+
+            document.getElementById('modalPrintBtn').onclick = () => downloadPDF(nota.id);
+            document.getElementById('notaModal').classList.remove('hidden');
+        }
+
+        function closeNota() { document.getElementById('notaModal').classList.add('hidden'); }
+        function changePage(dir) { currentPage += dir; renderNota(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+        
+        function filterNota() {
+            const d = document.getElementById('filterDate').value;
+            const s = document.getElementById('filterStatus').value;
+            filteredNota = allNota.filter(n => {
+                const mD = d ? n.tanggal.includes(d) : true;
+                const mS = s !== 'ALL' ? n.status.toLowerCase() === s.toLowerCase() : true;
+                return mD && mS;
+            });
+            currentPage = 1; renderNota();
+        }
+
+        async function downloadPDF(id) {
+            const n = allNota.find(x => x.id === id);
+            if (!n) return;
+
+            Swal.fire({ title: 'Menyiapkan Nota...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+            // Pengaturan Status dan Warna
+            const isP = n.status.toLowerCase() === 'paid' || n.status.toLowerCase() === 'lunas';
+            const colorStatus = isP ? '#16a34a' : '#dc2626';
+
+            // Isi Data ke Area Print Tersembunyi
+            document.getElementById('pdf-id').innerText = n.id;
+            document.getElementById('pdf-tgl').innerText = n.tanggal;
+            document.getElementById('pdf-nama').innerText = user.nama.toUpperCase();
+            document.getElementById('pdf-status').innerText = n.status;
+            document.getElementById('pdf-status').style.color = colorStatus;
+            document.getElementById('pdf-total').innerText = `Rp ${Number(n.total).toLocaleString('id-ID')}`;
+            
+            // Watermark
+            const wm = document.getElementById('pdf-watermark');
+            wm.innerText = isP ? 'LUNAS' : 'TAGIHAN';
+            wm.style.color = colorStatus;
+            wm.style.borderColor = colorStatus;
+
+            // Render Items ke Tabel PDF
+            let its = []; 
+            try { its = typeof n.items === 'string' ? JSON.parse(n.items) : n.items; } 
+            catch(e) { its = [{nama: "Layanan Teknik", qty: 1, harga: n.total}]; }
+
+            document.getElementById('pdf-items').innerHTML = its.map(i => `
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;">${i.nama}</td>
+                    <td style="padding: 12px; text-align: center;">${i.qty}</td>
+                    <td style="padding: 12px; text-align: right;">${Number(i.harga).toLocaleString('id-ID')}</td>
+                    <td style="padding: 12px; text-align: right; font-weight: bold;">${Number(i.qty * i.harga).toLocaleString('id-ID')}</td>
+                </tr>
+            `).join('');
+
+            // Jalankan html2pdf
+            const element = document.getElementById('notaPrintArea');
+            element.classList.remove('hidden');
+
+            const opt = {
+                margin: 10,
+                filename: `Nota-${n.id}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.classList.add('hidden');
+                Swal.close();
+            });
+        }
+    </script>
+</body>
+</html>
