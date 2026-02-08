@@ -7,12 +7,20 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         #map { height: 200px; border-radius: 1.2rem; margin-bottom: 1rem; z-index: 1; border: 2px solid #f3f4f6; }
         .mobile-container { max-width: 480px; min-height: 100vh; margin: 0 auto; background: #f9fafb; }
         input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.5; }
         .glass-header { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); }
+        
+        /* CSS Tambahan agar search bar rapi */
+        .leaflet-control-geocoder { border-radius: 8px !important; border: none !important; box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important; }
+        .leaflet-control-geocoder-form input { outline: none !important; font-size: 13px !important; }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -52,7 +60,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-bold text-blue-600 uppercase ml-2 mb-2">Geser Pin ke Lokasi Rumah Anda</label>
+                        <label class="block text-[10px] font-bold text-blue-600 uppercase ml-2 mb-2">Cari Alamat atau Geser Pin</label>
                         <div id="map"></div>
                         <input type="hidden" id="lat">
                         <input type="hidden" id="lang">
@@ -76,11 +84,9 @@
     </div>
 
 <script>
-    // GANTI DENGAN URL WEB APP ANDA
     const scriptURL = 'https://script.google.com/macros/s/AKfycbxgP-PtgOPTU-SpvpT4ATSvIUk5Vsg5VDmagnLYSzKhZfOhd5oGAZmh_XV8KOyeN30dBw/exec'; 
     let map, marker;
 
-    // 1. Inisialisasi Peta
     function initMap(lat, lng) {
         if(map) return;
         map = L.map('map').setView([lat, lng], 16);
@@ -90,6 +96,22 @@
         document.getElementById('lat').value = lat;
         document.getElementById('lang').value = lng;
 
+        // --- FITUR SEARCH ALAMAT ---
+        const geocoder = L.Control.Geocoder.nominatim();
+        L.Control.geocoder({
+            defaultMarkGeocode: false,
+            placeholder: "Cari jalan / bangunan...",
+            geocoder: geocoder
+        })
+        .on('markgeocode', function(e) {
+            const center = e.geocode.center;
+            map.setView(center, 16);
+            marker.setLatLng(center);
+            document.getElementById('lat').value = center.lat;
+            document.getElementById('lang').value = center.lng;
+        })
+        .addTo(map);
+
         marker.on('dragend', function() {
             const pos = marker.getLatLng();
             document.getElementById('lat').value = pos.lat;
@@ -97,18 +119,14 @@
         });
     }
 
-    // Ambil GPS
     navigator.geolocation.getCurrentPosition(
         (p) => initMap(p.coords.latitude, p.coords.longitude),
-        () => initMap(-8.197, 114.372) // Default Banyuwangi jika GPS mati
+        () => initMap(-8.197, 114.372) 
     );
 
-    // 2. Proses Submit
     document.getElementById('regForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        const btn = document.getElementById('btnSubmit');
-
-        // Modal Loading
+        
         Swal.fire({
             title: 'Sedang Mendaftar...',
             html: 'Mohon tunggu sebentar ya, bre.',
